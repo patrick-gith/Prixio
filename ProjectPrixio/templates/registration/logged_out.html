@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Déconnexion" %}{% endblock %}
+
+{% block content %}
+<section class="max-w-md mx-auto pt-16 text-center">
+  <div class="card" style="padding:2rem;">
+    <div style="font-size:2.5rem;">👋</div>
+    <h1 class="text-xl font-bold mt-4">{% trans "Vous êtes déconnecté" %}</h1>
+    <p class="text-sm text-muted mt-2">
+      {% trans "Merci d'avoir utilisé Prixio. À bientôt !" %}
+    </p>
+    <div class="mt-6" style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;">
+      <a href="{% url 'login' %}" class="btn btn-secondary">
+        {% trans "Se reconnecter" %}
+      </a>
+      <a href="{% url 'CoreApp:home' %}" class="btn btn-primary">
+        {% trans "Retour à l'accueil" %}
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

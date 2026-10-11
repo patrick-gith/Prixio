@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Connexion" %}{% endblock %}
+
+{% block content %}
+<section class="max-w-md mx-auto pt-16">
+  <div class="card" style="padding:2rem;">
+    <h1 class="text-2xl font-bold mb-2 text-center">{% trans "Connexion" %}</h1>
+    <p class="text-sm text-muted text-center mb-6">
+      {% trans "Accédez à votre veille et vos alertes." %}
+    </p>
+
+    {% if form.errors %}
+      <div class="mb-4 p-3 rounded-lg text-sm"
+           style="background:rgba(226,89,116,.1);color:var(--error-color);">
+        {% trans "Identifiants invalides. Réessayez." %}
+      </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label" for="id_username">{% trans "Nom d'utilisateur" %}</label>
+        <input type="text" name="username" id="id_username" class="form-input"
+               autocomplete="username" required autofocus
+               placeholder="votre_pseudo">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="id_password">{% trans "Mot de passe" %}</label>
+        <input type="password" name="password" id="id_password" class="form-input"
+               autocomplete="current-password" required
+               placeholder="••••••••">
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="btn btn-primary"
+              style="width:100%;justify-content:center;">
+        {% trans "Se connecter" %}
+      </button>
+    </form>
+
+    <div class="text-center mt-6 text-sm text-muted">
+      {% trans "Pas encore de compte ?" %}
+      <a href="{% url 'register' %}" style="color:var(--brand-color);font-weight:600;">
+        {% trans "Créer un compte" %}
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

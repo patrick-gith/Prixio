@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block head_title %}{% trans "Tableau de bord" %}{% endblock %}
+
+{% block content %}
+<section class="max-w-5xl mx-auto pt-8">
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold">{% trans "Tableau de bord" %}</h1>
+    <p class="text-sm text-muted">
+      {% trans "Vue d'ensemble de vos veilles et opportunités" %}
+    </p>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    <div class="card">
+      <div class="text-xs text-muted uppercase tracking-wide">{% trans "Produits suivis" %}</div>
+      <div style="font-size:1.3rem;font-weight:700;">{{ stats.watchlist_count }}</div>
+    </div>
+    <div class="card">
+      <div class="text-xs text-muted uppercase tracking-wide">{% trans "Alertes non lues" %}</div>
+      <div style="font-size:1.3rem;font-weight:700;">{{ stats.alerts_count }}</div>
+    </div>
+    <div class="card">
+      <div class="text-xs text-muted uppercase tracking-wide">{% trans "Score moyen" %}</div>
+      <div style="font-size:1.3rem;font-weight:700;">
+        {{ stats.avg_score }}<span class="text-muted" style="font-size:.8rem;">/100</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="text-xs text-muted uppercase tracking-wide">{% trans "Meilleure économie" %}</div>
+      <div style="font-size:1.3rem;font-weight:700;">
+        {{ stats.best_saving|floatformat:1 }}<span class="text-muted" style="font-size:.8rem;">%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="font-semibold">{% trans "Top opportunités du jour" %}</h2>
+      <form method="post" action="{% url 'PrixioApp:refresh_all' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary" style="font-size:.75rem;">
+          <i class="fas fa-sync-alt"></i> {% trans "Actualiser" %}
+        </button>
+      </form>
+    </div>
+
+    {% if opportunities %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {% for opp in opportunities %}
+          <a href="{% url 'CoreApp:analyze' identifier=opp.product.primary_id %}"
+             class="card" style="text-decoration:none;color:inherit;border:1px solid var(--input-border);">
+            <div style="display:flex;justify-content:space-between;">
+              <div class="font-semibold">{{ opp.product.title|truncatechars:30 }}</div>
+              <div class="badge badge-success">{{ opp.label }} {{ opp.score }}</div>
+            </div>
+            <div class="mt-2" style="font-size:1.1rem;font-weight:700;">
+              {{ opp.current|floatformat:2 }} {{ opp.currency }}
+            </div>
+            <div class="text-xs text-muted mt-1">
+              {% trans "Médiane" %} : {{ opp.baseline|floatformat:2 }}
+              {% if opp.deviation_pct > 0 %} · -{{ opp.deviation_pct }}%{% endif %}
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-8 text-muted">
+        <div style="font-size:1.5rem;">👁</div>
+        <p class="mt-2 text-sm">{% trans "Aucune veille pour l'instant." %}</p>
+        <a href="{% url 'CoreApp:home' %}" class="btn btn-primary mt-3" style="font-size:.75rem;">
+          {% trans "Rechercher un produit" %}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="font-semibold">{% trans "Alertes récentes" %}</h2>
+      <a href="{% url 'PrixioApp:alerts' %}" class="text-sm" style="color:var(--brand-color);">
+        {% trans "Tout voir" %}
+      </a>
+    </div>
+
+    {% if alerts %}
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        {% for alert in alerts %}
+          <div style="padding:.5rem 0;border-bottom:1px solid var(--input-border);">
+            <div style="display:flex;justify-content:space-between;">
+              <div class="font-semibold text-sm">{{ alert.product.title|truncatechars:40 }}</div>
+              <div class="text-xs text-muted">{{ alert.created_at|date:"d/m H:i" }}</div>
+            </div>
+            <div class="text-xs text-muted mt-1">{{ alert.message|truncatechars:80 }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-6 text-muted text-sm">
+        {% trans "Aucune alerte." %}
+      </div>
+    {% endif %}
+  </div>
+
+</section>
+{% endblock %}

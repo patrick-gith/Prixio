@@ -1,0 +1,282 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block head_title %}{% trans "Prixio" %}{% endblock %} • {% trans "Prixio" %}</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <script src="https://cdn.tailwindcss.com" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous">
+  <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicons/favicon.ico' %}">
+  <script>window.CSRF_TOKEN = "{{ csrf_token }}";</script>
+
+  <style>
+    :root{
+      --bg:#f6f9fc; --surface:#ffffff; --text:#1a1a1a; --muted:#67758a;
+      --glass-bg:rgba(255,255,255,0.9); --input-border:#e6ebf1;
+      --brand-color:#635bff; --brand-hover:#5a52e0;
+      --success-color:#00d4aa; --warning-color:#ffb800; --error-color:#e25974;
+      --shadow:0 1px 3px rgba(50,50,93,0.1), 0 1px 0 rgba(0,0,0,0.02);
+      --dropdown-shadow:0 7px 14px rgba(50,50,93,0.1), 0 3px 6px rgba(0,0,0,0.08);
+      --radius:8px; --header-height:64px;
+    }
+    .dark{
+      --bg:#0a0e17; --surface:#151a28; --text:#ffffff; --muted:#8c9bb4;
+      --glass-bg:rgba(21,26,40,0.9); --input-border:#2a3349;
+      --shadow:0 1px 3px rgba(0,0,0,0.2), 0 1px 0 rgba(0,0,0,0.05);
+      --dropdown-shadow:0 7px 14px rgba(0,0,0,0.2), 0 3px 6px rgba(0,0,0,0.1);
+    }
+    html,body{height:100%;}
+    body{background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+         font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
+
+    .baakap-header{background:var(--surface); box-shadow:var(--shadow);
+      border-bottom:1px solid var(--input-border); height:var(--header-height);
+      position:sticky; top:0; z-index:60;}
+    .header-container{max-width:1200px;margin:0 auto;padding:0 20px;height:100%;
+      display:flex;align-items:center;justify-content:space-between;}
+    .brand-section{display:flex;align-items:center;gap:12px;}
+    .brand-name{font-weight:700;font-size:16px;color:var(--text);}
+    .nav-section{display:flex;align-items:center;gap:14px;margin-left:18px;}
+    .nav-link{color:var(--muted);font-weight:600;font-size:14px;padding:8px 10px;
+      border-radius:8px;display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+      transition:all .15s ease;background:transparent;border:0;cursor:pointer;
+      font-family:inherit;}
+    .nav-link:hover{color:var(--text);background:rgba(99,91,255,0.04);}
+    .nav-link.active{color:var(--brand-color);background:rgba(99,91,255,0.08);}
+
+    .btn{padding:8px 14px;border-radius:10px;font-weight:600;border:0;cursor:pointer;
+      font-family:inherit;font-size:14px;text-decoration:none;display:inline-flex;
+      align-items:center;gap:6px;line-height:1;}
+    .btn-primary{background:var(--brand-color);color:#fff;box-shadow:0 8px 20px rgba(99,91,255,0.12);}
+    .btn-secondary{background:transparent;border:1px solid var(--input-border);color:var(--muted);}
+
+    .user-avatar{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;
+      justify-content:center;background:var(--brand-color);color:#fff;font-weight:700;cursor:pointer;}
+
+    .mobile-menu-btn{display:none;background:none;border:0;font-size:18px;padding:8px;
+      cursor:pointer;color:var(--text);}
+
+    @media (max-width:850px){
+      .nav-section{display:none;}
+      .mobile-menu-btn{display:block;}
+    }
+
+    .card{background:var(--surface);border-radius:12px;box-shadow:var(--shadow);padding:12px;}
+    .text-muted{color:var(--muted);}
+
+    .toast-container{position:fixed;top:1rem;right:1rem;display:flex;flex-direction:column;
+      gap:.75rem;z-index:9999;max-width:calc(100% - 2rem);pointer-events:none;}
+    .toast{pointer-events:auto;display:flex;align-items:flex-start;gap:.75rem;
+      min-width:260px;max-width:420px;padding:.75rem .9rem;border-radius:12px;
+      color:#fff;font-size:.9rem;box-shadow:0 12px 32px rgba(0,0,0,.18);
+      transform:translateX(120%);opacity:0;}
+    .toast .icon{width:36px;height:36px;min-width:36px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);}
+    .toast .content{flex:1;}
+    .toast .title{font-weight:700;font-size:.95rem;}
+    .toast .msg{font-weight:500;opacity:.95;}
+    .toast .close{background:transparent;border:none;color:inherit;cursor:pointer;padding:4px;}
+    .toast-success{background:linear-gradient(135deg,#059669,#10b981);}
+    .toast-error{background:linear-gradient(135deg,#dc2626,#ef4444);}
+    .toast-warning{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1f2937;}
+    .toast-info{background:linear-gradient(135deg,#2563eb,#60a5fa);}
+    .toast-enter{animation:toastIn .4s ease-out forwards;}
+    .toast-leave{animation:toastOut .3s ease-in forwards;}
+    @keyframes toastIn{from{transform:translateX(120%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+    @keyframes toastOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(120%);opacity:0;}}
+
+    .form-group{margin-bottom:1.5rem;}
+    .form-input,.form-select,.form-textarea{width:100%;padding:.75rem 1rem;
+      border:1px solid var(--input-border);border-radius:.5rem;background:var(--surface);
+      color:var(--text);font-size:1rem;transition:all .2s ease;font-family:inherit;}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;
+      border-color:var(--brand-color);box-shadow:0 0 0 3px rgba(99,91,255,0.1);}
+    .form-label{display:block;margin-bottom:.5rem;font-weight:600;color:var(--text);}
+
+    .badge{display:inline-block;padding:.25rem .75rem;border-radius:9999px;
+      font-size:.875rem;font-weight:600;}
+    .badge-primary{background:rgba(99,91,255,.1);color:var(--brand-color);}
+    .badge-success{background:rgba(0,212,170,.1);color:var(--success-color);}
+    .badge-warning{background:rgba(255,184,0,.1);color:var(--warning-color);}
+
+    .lang-select{background:transparent;border:1px solid var(--input-border);
+      border-radius:8px;padding:6px 8px;color:var(--muted);font-weight:600;
+      font-size:12px;cursor:pointer;font-family:inherit;}
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen">
+
+<header class="baakap-header">
+  <div class="header-container">
+    <div class="flex items-center">
+      <a href="{% url 'CoreApp:home' %}" class="brand-section" style="text-decoration:none;">
+        <img src="{% static 'logo.png' %}" alt="{% trans 'Prixio' %}"
+             class="w-12 h-10 sm:w-16 sm:h-12" onerror="this.style.display='none'">
+        <span class="brand-name ml-2">Prix<span style="color:var(--brand-color)">io</span></span>
+      </a>
+
+      <nav class="nav-section" role="navigation" aria-label="{% trans 'Navigation principale' %}">
+        <a href="{% url 'CoreApp:home' %}"
+           class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+          <i class="fas fa-search"></i> <span>{% trans "Rechercher" %}</span>
+        </a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'PrixioApp:dashboard' %}"
+             class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i> <span>{% trans "Tableau de bord" %}</span>
+          </a>
+          <a href="{% url 'PrixioApp:watchlist' %}"
+             class="nav-link {% if request.resolver_match.url_name == 'watchlist' %}active{% endif %}">
+            <i class="fas fa-eye"></i> <span>{% trans "Ma veille" %}</span>
+          </a>
+          <a href="{% url 'PrixioApp:alerts' %}"
+             class="nav-link {% if request.resolver_match.url_name == 'alerts' %}active{% endif %}">
+            <i class="fas fa-bell"></i> <span>{% trans "Alertes" %}</span>
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+
+    <div class="controls-section" style="display:flex;align-items:center;gap:12px;">
+
+      <!-- Sélecteur de langue -->
+      <form action="{% url 'set_language' %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <input name="next" type="hidden" value="{{ request.get_full_path }}">
+        {% get_current_language as CURRENT_LANG %}
+        {% get_available_languages as LANGS %}
+        <select name="language" onchange="this.form.submit()" class="lang-select"
+                aria-label="{% trans 'Changer de langue' %}">
+          {% for code, name in LANGS %}
+            <option value="{{ code }}" {% if code == CURRENT_LANG %}selected{% endif %}>
+              {{ name }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+
+      {% if user.is_authenticated %}
+        <div class="user-avatar" title="{{ user.username }}">
+          {{ user.username|slice:":1"|upper }}
+        </div>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary" title="{% trans 'Se déconnecter' %}">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-secondary">
+          {% trans "Connexion" %}
+        </a>
+        <a href="{% url 'register' %}" class="btn btn-primary">
+          {% trans "S'inscrire" %}
+        </a>
+      {% endif %}
+
+      <button id="themeToggle" class="nav-link" title="{% trans 'Basculer le thème' %}"
+              aria-label="{% trans 'Basculer le thème' %}">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+  {% if messages %}
+    <div id="server-messages" class="sr-only" aria-hidden="true">
+      {% for message in messages %}
+        <div class="msg-item" data-tags="{{ message.tags }}" data-text="{{ message|escapejs }}"></div>
+      {% endfor %}
+    </div>
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+  <footer class="mt-12 text-sm text-center text-muted">
+    © {% now "Y" %} {{ COMPANY_NAME|default:"Prixio" }} — {% trans "Intelligence tarifaire universelle" %}
+  </footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  const q = (s, c=document) => c.querySelector(s);
+
+  function initTheme(){
+    const btn = q('#themeToggle');
+    const saved = localStorage.getItem('theme');
+    const prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefers)) document.documentElement.classList.add('dark');
+    if (!btn) return;
+    btn.innerHTML = `<i class="fas ${document.documentElement.classList.contains('dark') ? 'fa-sun' : 'fa-moon'}"></i>`;
+    btn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      btn.innerHTML = `<i class="fas ${isDark ? 'fa-sun' : 'fa-moon'}"></i>`;
+    });
+  }
+
+  function initToasts(){
+    const container = q('#toastContainer');
+    const serverMessages = q('#server-messages');
+    if (!container || !serverMessages) return;
+
+    function showToast(type, title, text, timeout=5000){
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type} toast-enter`;
+      const icon = type==='success' ? 'fa-check'
+                 : type==='error'   ? 'fa-times'
+                 : type==='warning' ? 'fa-exclamation'
+                 : 'fa-info';
+      toast.innerHTML = `
+        <div class="icon"><i class="fas ${icon}"></i></div>
+        <div class="content">
+          <div class="title">${title}</div>
+          <div class="msg">${text}</div>
+        </div>
+        <button class="close" aria-label="Fermer"><i class="fas fa-times"></i></button>`;
+      container.appendChild(toast);
+      const remove = () => {
+        toast.classList.remove('toast-enter');
+        toast.classList.add('toast-leave');
+        toast.addEventListener('animationend', () => toast.remove(), {once:true});
+      };
+      toast.querySelector('.close').addEventListener('click', remove);
+      setTimeout(remove, timeout);
+    }
+
+    const titles = {
+      success: "{% trans 'Succès' %}",
+      error: "{% trans 'Erreur' %}",
+      warning: "{% trans 'Attention' %}",
+      info: "{% trans 'Information' %}"
+    };
+
+    serverMessages.querySelectorAll('.msg-item').forEach(el => {
+      const tags = el.dataset.tags || '';
+      const text = el.dataset.text || '';
+      let type = 'info';
+      if (tags.includes('success')) type = 'success';
+      else if (tags.includes('error') || tags.includes('danger')) type = 'error';
+      else if (tags.includes('warning')) type = 'warning';
+      showToast(type, titles[type], text);
+    });
+    serverMessages.remove();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    initToasts();
+  });
+})();
+</script>
+{% block extra_body %}{% endblock %}
+</body>
+</html>

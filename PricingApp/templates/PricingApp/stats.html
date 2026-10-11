@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n humanize %}
+
+{% block head_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto pt-8">
+  <h1 class="text-2xl font-bold mb-6">{{ title }}</h1>
+
+  <div class="grid grid-cols-3 gap-3 mb-6">
+    <div class="card text-center">
+      <div class="text-xs text-muted uppercase">{% trans "Produits" %}</div>
+      <div style="font-size:1.5rem;font-weight:700;">{{ product_count|intcomma }}</div>
+    </div>
+    <div class="card text-center">
+      <div class="text-xs text-muted uppercase">{% trans "Relevés de prix" %}</div>
+      <div style="font-size:1.5rem;font-weight:700;">{{ price_count|intcomma }}</div>
+    </div>
+    <div class="card text-center">
+      <div class="text-xs text-muted uppercase">{% trans "Sources actives" %}</div>
+      <div style="font-size:1.5rem;font-weight:700;">{{ source_count }}</div>
+    </div>
+  </div>
+
+  {% if sources %}
+    <div class="card">
+      <h2 class="font-semibold mb-3">{% trans "Sources" %}</h2>
+      <ul style="list-style:none;padding:0;">
+        {% for s in sources %}
+          <li style="padding:.5rem 0;border-bottom:1px solid var(--input-border);">
+            <strong>{{ s.name }}</strong>
+            <span class="text-muted text-sm">· {{ s.region }} · {{ s.currency }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

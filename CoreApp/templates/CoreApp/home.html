@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Rechercher un prix" %}{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto pt-20 pb-12 text-center">
+  <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
+    {% trans "Est-ce que ce prix est" %}
+    <span style="color:var(--brand-color)">{% trans "bon" %}</span> ?
+  </h1>
+  <p class="mt-4 text-lg text-muted">
+    {% trans "Colle un ISBN, un code-barres, ou le nom d'une crypto." %}<br>
+    {% trans "Prixio te dit si c'est le moment d'acheter." %}
+  </p>
+
+  {# CTA contextuels #}
+  <div class="mt-8" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+    {% if user.is_authenticated %}
+      <a href="{% url 'PrixioApp:dashboard' %}" class="btn btn-primary">
+        <i class="fas fa-chart-line"></i>
+        {% trans "Voir mon tableau de bord" %}
+      </a>
+      <a href="{% url 'PrixioApp:watchlist' %}" class="btn btn-secondary">
+        <i class="fas fa-eye"></i>
+        {% trans "Ma veille" %}
+      </a>
+    {% else %}
+      <a href="{% url 'register' %}" class="btn btn-primary">
+        <i class="fas fa-user-plus"></i>
+        {% trans "Créer un compte gratuit" %}
+      </a>
+      <a href="{% url 'login' %}" class="btn btn-secondary">
+        {% trans "Se connecter" %}
+      </a>
+    {% endif %}
+  </div>
+</section>
+
+<section class="max-w-2xl mx-auto">
+  <form method="post" style="display:flex;gap:12px;">
+    {% csrf_token %}
+    <div style="flex:1;">{{ form.identifier }}</div>
+    <button type="submit" class="btn btn-primary" style="padding:0 24px;">
+      {% trans "Analyser" %}
+    </button>
+  </form>
+
+  <div class="mt-6 flex flex-wrap gap-2 justify-center">
+    {% for ex in examples %}
+      <a href="{% url 'CoreApp:analyze' identifier=ex.value %}"
+         class="badge badge-primary" style="text-decoration:none;">
+        {{ ex.label }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+    <div class="card">
+      <div style="font-size:1.8rem;">🔍</div>
+      <div class="mt-2 font-semibold">{% trans "Identifie" %}</div>
+      <div class="text-muted text-sm mt-1">{% trans "N'importe quel produit, partout." %}</div>
+    </div>
+    <div class="card">
+      <div style="font-size:1.8rem;">📊</div>
+      <div class="mt-2 font-semibold">{% trans "Compare" %}</div>
+      <div class="text-muted text-sm mt-1">{% trans "Prix actuels vs historique 90 jours." %}</div>
+    </div>
+    <div class="card">
+      <div style="font-size:1.8rem;">✅</div>
+      <div class="mt-2 font-semibold">{% trans "Décide" %}</div>
+      <div class="text-muted text-sm mt-1">{% trans "Achète, attends, ou va voir ailleurs." %}</div>
+    </div>
+  </div>
+
+  {% if not user.is_authenticated %}
+    <div class="mt-12 card" style="padding:1.5rem;text-align:center;">
+      <div class="font-semibold">{% trans "Pourquoi créer un compte ?" %}</div>
+      <p class="text-sm text-muted mt-2">
+        {% trans "Suivez vos produits, recevez des alertes quand les prix baissent, et retrouvez votre historique." %}
+      </p>
+      <a href="{% url 'register' %}" class="btn btn-primary mt-4">
+        {% trans "Créer mon compte" %} →
+      </a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
