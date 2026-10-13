@@ -1,0 +1,53 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block head_title %}{{ title }}{% endblock %}
+{% block content %}
+<section class="max-w-5xl mx-auto pt-8">
+  <h1 class="text-2xl font-bold mb-6">{{ title }}</h1>
+
+  {% if not rows %}
+    <div class="card text-center py-10">
+      <p class="text-muted text-sm">{% trans "Aucune intention d'achat en cours." %}</p>
+    </div>
+  {% else %}
+    {% for row in rows %}
+      {% if row.result.has_data %}
+        <div class="card mb-3">
+          <div style="display:flex;justify-content:space-between;">
+            <div class="font-semibold">{{ row.intent.product.title }}</div>
+            <div class="badge
+              {% if row.result.signal == 'WAIT' %}badge-warning
+              {% elif row.result.signal == 'BUY_NOW' %}badge-success
+              {% else %}badge-primary{% endif %}">
+              {{ row.result.signal }}
+            </div>
+          </div>
+          <div class="mt-2 text-sm">
+            {% blocktrans with q=row.intent.quantity d=row.intent.deadline %}
+              Quantité : {{ q }} — Deadline : {{ d }}
+            {% endblocktrans %}
+          </div>
+          <div class="mt-2 text-sm">
+            {% trans "Prix actuel" %} : {{ row.result.current_price|floatformat:2 }} {{ row.result.currency }}<br>
+            {% trans "Prévision" %} : {{ row.result.forecast_price|floatformat:2 }} {{ row.result.currency }}
+            ({{ row.result.delta_pct }}%)
+          </div>
+          {% if row.result.total_saving > 0 %}
+            <div class="mt-2 text-sm" style="color:var(--success-color);">
+              💰 {% trans "Économie estimée" %} : {{ row.result.total_saving|floatformat:2 }} {{ row.result.currency }}
+            </div>
+          {% endif %}
+          <div class="mt-3" style="display:flex;gap:.5rem;">
+            <a href="{% url 'PricingApp:purchase_order_pdf' row.intent.id %}"
+                class="btn btn-primary" style="font-size:.75rem;">
+                <i class="fas fa-file-pdf"></i>
+                {% trans "Télécharger le bon de commande" %}
+              </a>
+            </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+  
+  {% endif %}
+</section>
+{% endblock %}

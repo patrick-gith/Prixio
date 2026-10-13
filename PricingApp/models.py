@@ -96,3 +96,66 @@ class Alert(models.Model):
 
     def __str__(self):
         return f"[{self.score:.0f}] {self.product.title}"
+
+
+
+class FxRate(models.Model):
+    """Taux de change journalier, mis en cache pour éviter les appels API."""
+    date = models.DateField(_("Date"), db_index=True)
+    base = models.CharField(_("Devise de base"), max_length=8)
+    quote = models.CharField(_("Devise cible"), max_length=8)
+    rate = models.DecimalField(_("Taux"), max_digits=18, decimal_places=8)
+
+    class Meta:
+        unique_together = ("date", "base", "quote")
+        indexes = [models.Index(fields=["date", "base", "quote"])]
+
+    def __str__(self):
+        return f"{self.date} 1 {self.base} = {self.rate} {self.quote}"
+
+
+class CompetitorListing(models.Model):
+    """Mode B — un vendeur surveillé pour un produit donné."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="listings",
+    )
+    product = models.ForeignKey(
+        "CatalogApp.Product", on_delete=models.CASCADE,
+        related_name="listings",
+    )
+    my_price = models.DecimalField(_("Mon prix"), max_digits=14, decimal_places=2)
+    my_currency = models.CharField(_("Devise"), max_length=8)
+    region = models.CharField(_("Région"), max_length=8, default="FR")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "product", "region")
+        ordering = ["-created_at"]
+
+
+class PurchaseIntent(models.Model):
+    """Mode C — intention d'achat avec deadline."""
+    STATUS_CHOICES = [
+        ("pending", _("En attente")),
+        ("done", _("Conclu")),
+        ("cancelled", _("Annulé")),
+    ]
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="intents",
+    )
+    product = models.ForeignKey(
+        "CatalogApp.Product", on_delete=models.CASCADE,
+        related_name="intents",
+    )
+    quantity = models.PositiveIntegerField(_("Quantité"), default=1)
+    deadline = models.DateField(_("Date limite"))
+    region = models.CharField(_("Région"), max_length=8, default="FR")
+    status = models.CharField(
+        _("Statut"), max_length=16, choices=STATUS_CHOICES, default="pending",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

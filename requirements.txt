@@ -6,3 +6,4 @@ gunicorn==23.0.0
 whitenoise==6.7.0
 django-cors-headers==4.4.0
 django-rosetta==0.10.1
+python-telegram-bot==21.6

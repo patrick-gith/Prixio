@@ -1,0 +1,46 @@
+{% extends "base.html" %}{% load i18n humanize %}
+{% block head_title %}{{ title }}{% endblock %}
+{% block content %}
+<section class="max-w-5xl mx-auto pt-8">
+  <h1 class="text-2xl font-bold mb-6">{{ title }}</h1>
+
+  {% if not rows %}
+    <div class="card text-center py-10">
+      <p class="text-muted text-sm">{% trans "Aucun produit en veille concurrentielle." %}</p>
+    </div>
+  {% else %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {% for row in rows %}
+        {% if row.result.has_data %}
+          <div class="card" style="border-left:4px solid
+            {% if row.result.position_pct > 5 %}var(--error-color)
+            {% elif row.result.position_pct < -5 %}var(--success-color)
+            {% else %}var(--warning-color){% endif %};">
+            <div class="font-semibold">{{ row.listing.product.title|truncatechars:35 }}</div>
+            <div class="mt-2 text-sm">
+              {% trans "Ton prix" %} : <b>{{ row.listing.my_price|floatformat:2 }} {{ row.listing.my_currency }}</b><br>
+              {% trans "Médiane marché" %} : {{ row.result.market_median_local|floatformat:2 }} {{ row.listing.my_currency }}
+            </div>
+            <div class="mt-3 text-sm"
+              style="color:{% if row.result.position_pct > 5 %}var(--error-color){% else %}var(--success-color){% endif %};">
+              {% if row.result.position_pct > 0 %}
+                ⚠️ {% trans "Tu es" %} {{ row.result.position_pct }}% {% trans "au-dessus du marché" %}
+              {% else %}
+                ✅ {% trans "Tu es" %} {{ row.result.position_pct|floatformat:1 }}% {% trans "sous le marché" %}
+              {% endif %}
+            </div>
+            <div class="mt-2 text-xs text-muted">
+              {% trans "Prix suggéré" %} : <b>{{ row.result.suggested_local|floatformat:2 }} {{ row.listing.my_currency }}</b>
+              · {{ row.result.rival_count }} {% trans "vendeurs comparés" %}
+            </div>
+            <div class="mt-2 text-xs">
+              {% trans "Moins cher" %} : {{ row.result.cheapest.price_local|floatformat:2 }}
+              {{ row.result.cheapest.currency }} ({{ row.result.cheapest.source }} · {{ row.result.cheapest.region }})
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

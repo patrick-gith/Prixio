@@ -1,0 +1,4 @@
+# .env
+EBAY_CLIENT_ID='ton_app_id'
+EBAY_CLIENT_SECRET='ton_cert_id'
+EBAY_MARKETPLACE_ID='EBAY_FR'

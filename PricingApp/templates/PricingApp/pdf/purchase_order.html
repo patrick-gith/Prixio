@@ -1,0 +1,199 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:language_code }}">
+<head>
+  <meta charset="utf-8">
+  <title>{% trans "Purchase Order" %} {{ reference }}</title>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="brand">Prix<span class="brand-accent">io</span></div>
+      <div class="brand-sub">{% trans "Universal Pricing Intelligence" %}</div>
+    </div>
+    <div class="header-right">
+      <div class="doc-title">{% trans "PURCHASE ORDER" %}</div>
+      <div class="doc-ref">{{ reference }}</div>
+      <div class="doc-date">
+        {% blocktrans with date=issued_at|date:"SHORT_DATETIME_FORMAT" %}
+          Issued on {{ date }}
+        {% endblocktrans %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Price signal -->
+  <section class="signal signal-{{ signal|lower }}">
+    <div class="signal-label">{% trans "SIGNAL" %}</div>
+    <div class="signal-value">{{ signal_label }}</div>
+
+    {% if signal == "WAIT" %}
+      <div class="signal-sub">
+        {% blocktrans count days=days_ahead %}
+          Optimal buying window in <strong>{{ days }} day</strong>
+        {% plural %}
+          Optimal buying window in <strong>{{ days }} days</strong>
+        {% endblocktrans %}
+      </div>
+    {% elif signal == "BUY_NOW" %}
+      <div class="signal-sub">
+        {% trans "The current price is close to its historical low." %}
+      </div>
+    {% else %}
+      <div class="signal-sub">
+        {% trans "No urgency — the price is expected to remain stable." %}
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Parties -->
+  <section class="parties">
+    <div class="party">
+      <div class="party-label">{% trans "Issuer" %}</div>
+      <div class="party-name">{{ company_name }}</div>
+      <div class="party-detail">{{ company_email }}</div>
+    </div>
+
+    <div class="party">
+      <div class="party-label">{% trans "Buyer" %}</div>
+      <div class="party-name">{{ buyer_username }}</div>
+      <div class="party-detail">{{ buyer_email|default:"—" }}</div>
+    </div>
+
+    <div class="party">
+      <div class="party-label">{% trans "Requested delivery" %}</div>
+      <div class="party-name">{{ deadline|date:"SHORT_DATE_FORMAT" }}</div>
+      <div class="party-detail">
+        {% trans "Region" %}: {{ region }}
+      </div>
+    </div>
+  </section>
+
+  <!-- Product table -->
+  <section class="items">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-desc">{% trans "Description" %}</th>
+          <th class="col-qty">{% trans "Qty" %}</th>
+          <th class="col-price">{% trans "Unit price" %}</th>
+          <th class="col-total">{% trans "Total" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-desc">
+            <div class="item-title">{{ product.title }}</div>
+            {% if product.brand %}
+              <div class="item-meta">{{ product.brand }}</div>
+            {% endif %}
+            <div class="item-meta">
+              {% trans "Ref." %} {{ product.primary_id }}
+            </div>
+          </td>
+          <td class="col-qty">{{ quantity }}</td>
+          <td class="col-price">
+            {{ reference_price|floatformat:2 }} {{ currency }}
+          </td>
+          <td class="col-total">
+            {{ total|floatformat:2 }} {{ currency }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Summary -->
+  <section class="summary">
+    <table class="summary-table">
+      <tr>
+        <td class="summary-label">{% trans "Current unit price" %}</td>
+        <td class="summary-value">
+          {{ current_price|floatformat:2 }} {{ currency }}
+        </td>
+      </tr>
+      <tr>
+        <td class="summary-label">{% trans "Forecast unit price" %}</td>
+        <td class="summary-value">
+          {{ forecast_price|floatformat:2 }} {{ currency }}
+        </td>
+      </tr>
+      <tr class="summary-highlight">
+        <td class="summary-label">{% trans "Price selected for this order" %}</td>
+        <td class="summary-value">
+          {{ reference_price|floatformat:2 }} {{ currency }}
+        </td>
+      </tr>
+      <tr class="summary-total">
+        <td class="summary-label">{% trans "GRAND TOTAL" %}</td>
+        <td class="summary-value">
+          {{ total|floatformat:2 }} {{ currency }}
+        </td>
+      </tr>
+      {% if total_saving > 0 %}
+        <tr class="summary-saving">
+          <td class="summary-label">
+            {% trans "Estimated savings vs. buying now" %}
+          </td>
+          <td class="summary-value">
+            + {{ total_saving|floatformat:2 }} {{ currency }}
+          </td>
+        </tr>
+      {% endif %}
+    </table>
+  </section>
+
+  <!-- Analysis -->
+  <section class="notes">
+    <div class="notes-title">{% trans "Analysis" %}</div>
+
+    <p>
+      {% blocktrans with company=company_name %}
+        This purchase order was automatically generated by {{ company }}
+        after analyzing <strong>180 days of price history</strong> across
+        all monitored sources.
+      {% endblocktrans %}
+    </p>
+
+    {% if signal == "WAIT" %}
+      <p>
+        {% blocktrans with delta=delta_pct|floatformat:1 %}
+          The product price is expected to decrease by approximately
+          <strong>{{ delta }}%</strong> before the deadline. We recommend
+          waiting before placing the order to maximize savings.
+        {% endblocktrans %}
+      </p>
+    {% elif signal == "BUY_NOW" %}
+      <p>
+        {% blocktrans with delta=delta_pct|floatformat:1 %}
+          The current price is <strong>{{ delta }}%</strong> below the
+          forecast price at the deadline. We recommend placing the order now.
+        {% endblocktrans %}
+      </p>
+    {% endif %}
+
+    <p class="notes-disclaimer">
+      {% blocktrans with currency_code=currency %}
+        This document provides an estimate. Actual prices may vary depending
+        on stock availability and seller conditions at the time the order
+        is placed. Reference currency: {{ currency_code }}.
+      {% endblocktrans %}
+    </p>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-left">
+      {{ company_name }} · {{ company_email }}
+    </div>
+    <div class="footer-right">
+      {% blocktrans with ref=reference %}
+        Page 1 / 1 — Ref. {{ ref }}
+      {% endblocktrans %}
+    </div>
+  </footer>
+
+</body>
+</html>

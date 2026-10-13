@@ -23,14 +23,30 @@ def opportunity_score(current: float, baseline: dict) -> dict:
     med = baseline["median"]
     deviation = max((med - current) / med, 0.0) if med else 0.0
     volatility = baseline["volatility"]
-    freshness = 1.0
+    freshness = 1.0  # TODO : calculer depuis la date du premier prix bas
     rare = 1.0 if current <= baseline["p10"] else 0.0
 
+    # ──────────────────────────────────────────────────────────────
+    # Formule calibrée pour que :
+    #   -30% de remise + produit stable + rare  → score ~85
+    #   -20%                                     → score ~70
+    #   prix au-dessus de la médiane             → score < 30
+    #
+    # Le poids dominant (0.70) va à la déviation, car c'est LE signal
+    # qui intéresse l'acheteur. Les 0.30 restants récompensent la
+    # stabilité, la fraîcheur et le caractère exceptionnel.
+    #
+    # On normalise la déviation sur 35% : au-delà, considéré comme
+    # "maximalement anormal". Cela évite qu'un produit gratuit (dev=1)
+    # écrase tout le monde — 35% sous la médiane est déjà énorme.
+    # ──────────────────────────────────────────────────────────────
+    deviation_normalized = min(deviation / 0.35, 1.0)
+
     score = 100 * min(
-        0.45 * deviation
-        + 0.20 * (1 - min(volatility, 1.0))
-        + 0.20 * freshness
-        + 0.15 * rare,
+        0.70 * deviation_normalized      # ← le vrai signal
+        + 0.10 * (1 - min(volatility, 1.0))
+        + 0.10 * freshness
+        + 0.10 * rare,
         1.0,
     )
 

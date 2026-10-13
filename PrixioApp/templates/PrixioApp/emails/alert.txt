@@ -1,0 +1,13 @@
+Bonjour {{ user.username }},
+
+Bonne nouvelle : le prix de « {{ alert.product.title }} » vient de baisser.
+
+  Prix actuel   : {{ analysis.current_price|floatformat:2 }} {{ analysis.currency }}
+  Prix habituel : {{ analysis.baseline.median|floatformat:2 }} {{ analysis.currency }}
+  Écart         : -{{ analysis.deviation_pct }}%
+  Score         : {{ analysis.score }}/100
+
+Voir la fiche produit : {{ request.scheme }}://{{ request.get_host }}{% url 'CoreApp:analyze' identifier=alert.product.primary_id %}
+
+—
+Prixio

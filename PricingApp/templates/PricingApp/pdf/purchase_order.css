@@ -1,0 +1,246 @@
+/* ============================================================
+   Prixio — Feuille de style PDF (WeasyPrint)
+   Règles clés :
+     - A4 portrait, marges 15 mm
+     - Police Inter/serif fallback
+     - Pas de JavaScript, pas de CSS grid
+     - Couleurs sobres, lisibles à l'impression
+   ============================================================ */
+
+@page {
+  size: A4 portrait;
+  margin: 14mm 15mm 18mm 15mm;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "DejaVu Sans", "Inter", -apple-system, sans-serif;
+  font-size: 10pt;
+  color: #1a1a1a;
+  line-height: 1.45;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- En-tête ---------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #635bff;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+.brand {
+  font-size: 22pt;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+.brand-accent { color: #635bff; }
+.brand-sub {
+  font-size: 8pt;
+  color: #6b7280;
+  margin-top: 1px;
+}
+.header-right { text-align: right; }
+.doc-title {
+  font-size: 13pt;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #1a1a1a;
+}
+.doc-ref {
+  font-size: 10pt;
+  font-weight: 600;
+  color: #635bff;
+  margin-top: 2px;
+  font-family: "DejaVu Sans Mono", monospace;
+}
+.doc-date {
+  font-size: 8pt;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* ---------- Bandeau signal ---------- */
+.signal {
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  page-break-inside: avoid;
+}
+.signal-wait       { background: #fef3c7; border-left: 4px solid #f59e0b; }
+.signal-buy_now    { background: #d1fae5; border-left: 4px solid #10b981; }
+.signal-neutral    { background: #e0e7ff; border-left: 4px solid #635bff; }
+.signal-label {
+  font-size: 7pt;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+.signal-value {
+  font-size: 14pt;
+  font-weight: 800;
+  margin-top: 1px;
+}
+.signal-sub {
+  font-size: 9pt;
+  color: #374151;
+  margin-top: 3px;
+}
+
+/* ---------- Parties prenantes ---------- */
+.parties {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.party {
+  flex: 1;
+  padding: 8px 10px;
+  background: #f9fafb;
+  border-radius: 5px;
+  border: 1px solid #e5e7eb;
+}
+.party-label {
+  font-size: 7pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+}
+.party-name {
+  font-size: 10pt;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.party-detail {
+  font-size: 8pt;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
+/* ---------- Tableau articles ---------- */
+.items { margin-bottom: 14px; }
+.items table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.items thead th {
+  background: #635bff;
+  color: #ffffff;
+  font-size: 8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 7px 8px;
+  text-align: left;
+}
+.items thead th.col-qty,
+.items thead th.col-price,
+.items thead th.col-total { text-align: right; }
+.items tbody td {
+  padding: 9px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+.item-title {
+  font-size: 10pt;
+  font-weight: 600;
+}
+.item-meta {
+  font-size: 8pt;
+  color: #6b7280;
+  margin-top: 1px;
+}
+.col-qty, .col-price, .col-total {
+  text-align: right;
+  white-space: nowrap;
+}
+.col-price, .col-total {
+  font-family: "DejaVu Sans Mono", monospace;
+  font-size: 9pt;
+}
+
+/* ---------- Récapitulatif ---------- */
+.summary {
+  margin-left: auto;
+  width: 65%;
+  margin-bottom: 14px;
+  page-break-inside: avoid;
+}
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.summary-table td {
+  padding: 5px 8px;
+  font-size: 9pt;
+}
+.summary-label { color: #374151; }
+.summary-value {
+  text-align: right;
+  font-family: "DejaVu Sans Mono", monospace;
+  font-weight: 600;
+}
+.summary-highlight {
+  background: #f3f4f6;
+  border-top: 1px solid #e5e7eb;
+}
+.summary-total {
+  border-top: 2px solid #1a1a1a;
+  background: #1a1a1a;
+  color: #ffffff;
+}
+.summary-total .summary-value {
+  font-size: 11pt;
+  font-weight: 800;
+}
+.summary-saving {
+  color: #059669;
+}
+.summary-saving .summary-value { color: #059669; }
+
+/* ---------- Notes ---------- */
+.notes {
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 5px;
+  border-left: 3px solid #635bff;
+  font-size: 8.5pt;
+  color: #374151;
+  page-break-inside: avoid;
+}
+.notes-title {
+  font-size: 8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #635bff;
+  margin-bottom: 4px;
+}
+.notes p { margin: 4px 0; }
+.notes-disclaimer {
+  font-size: 7.5pt;
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 6px !important;
+}
+
+/* ---------- Pied de page ---------- */
+.footer {
+  position: fixed;
+  bottom: -12mm;
+  left: 0;
+  right: 0;
+  padding-top: 5px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 7.5pt;
+  color: #6b7280;
+  display: flex;
+  justify-content: space-between;
+}
+.footer-right { text-align: right; }

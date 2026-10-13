@@ -1,0 +1,60 @@
+{% extends "base.html" %}{% load i18n %}
+{% block head_title %}{% trans "Lier Telegram" %}{% endblock %}
+{% block content %}
+<section class="max-w-md mx-auto pt-12">
+  <div class="card" style="padding:2rem;">
+
+    {% if linked %}
+      <div style="font-size:2rem;text-align:center;">✅</div>
+      <h1 class="text-xl font-bold mt-3 text-center">
+        {% trans "Telegram connecté" %}
+      </h1>
+      <p class="text-sm text-muted text-center mt-2">
+        {% trans "Vous recevrez les alertes prix directement sur Telegram." %}
+      </p>
+      <form method="post" action="{% url 'PrixioApp:telegram_unlink' %}" class="mt-6 text-center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary">
+          {% trans "Déconnecter" %}
+        </button>
+      </form>
+
+    {% elif not telegram_configured %}
+      <div class="text-center">
+        <p class="text-sm text-muted">
+          {% trans "Le bot Telegram n'est pas configuré sur ce serveur." %}
+        </p>
+      </div>
+
+    {% else %}
+      <h1 class="text-xl font-bold text-center">{% trans "Lier Telegram" %}</h1>
+      <p class="text-sm text-muted text-center mt-2">
+        {% trans "Recevez les alertes prix en temps réel, sans email." %}
+      </p>
+
+      <ol class="mt-6 text-sm" style="padding-left:1.2rem;">
+        <li>{% trans "Ouvrez le bot Telegram" %}</li>
+        <li>{% trans "Envoyez-lui ce code :" %}</li>
+      </ol>
+
+      <div style="font-family:monospace;font-size:1.6rem;font-weight:700;
+                  letter-spacing:.3em;text-align:center;padding:1rem;
+                  background:var(--bg);border-radius:8px;margin:1rem 0;">
+        {{ code }}
+      </div>
+
+      {% if deep_link %}
+        <a href="{{ deep_link }}" target="_blank" rel="noopener"
+           class="btn btn-primary" style="width:100%;justify-content:center;">
+          <i class="fab fa-telegram"></i> {% trans "Ouvrir Telegram" %}
+        </a>
+      {% endif %}
+
+      <p class="text-xs text-muted text-center mt-4">
+        {% trans "Le code expire dans 10 minutes." %}
+      </p>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

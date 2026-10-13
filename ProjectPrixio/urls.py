@@ -36,7 +36,7 @@ urlpatterns = [
 
     # Auth Django standard : login, logout, password reset/change
     path("accounts/", include("django.contrib.auth.urls")),
-
+    path("", include(("PricingApp.urls", "PricingApp"), namespace="PricingApp")),  # ← ajout
     # Inscription (vue custom, un seul template)
     path("accounts/register/", register, name="register"),
 ]
@@ -44,6 +44,8 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path("", include(("CoreApp.urls", "CoreApp"), namespace="CoreApp")),
     path("", include(("PrixioApp.urls", "PrixioApp"), namespace="PrixioApp")),
+    path("", include(("CatalogApp.urls", "CatalogApp"), namespace="CatalogApp")),
+    
     prefix_default_language=False,
 )
 
