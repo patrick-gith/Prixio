@@ -1,4 +1,5 @@
-{% extends "base.html" %}{% load i18n %}
+{% extends "base.html" %}
+{% load i18n pricing_extras %}
 {% block head_title %}{% trans "Vérification" %}{% endblock %}
 
 {% block content %}
@@ -113,7 +114,8 @@
                   <input type="text" name="override_{{ line.id }}_designation"
                          class="form-input" style="padding:8px 10px;font-size:13px;"
                          value="{{ line.designation|default:'' }}"
-                         placeholder="{{ line.raw_data|dictsort:''|first|default:'' }}">
+                         placeholder="{{ line.raw_data|first_value }}">
+                         
                 </td>
                 <td style="padding:6px;">
                   <input type="number" name="override_{{ line.id }}_quantity"

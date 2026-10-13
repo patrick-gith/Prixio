@@ -246,3 +246,63 @@ DEFAULT_ALERT_THRESHOLD = 75
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "")
+EBAY_CLIENT_ID='ton_app_id'
+EBAY_CLIENT_SECRET='ton_cert_id'
+EBAY_MARKETPLACE_ID='EBAY_FR'
+
+# ==========================================================
+# CELERY — Traitement asynchrone
+# ==========================================================
+
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+# Compat Celery 6.0 — évite le warning de dépréciation
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+# Format des messages
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+
+# Fuseau horaire (hérite du TIME_ZONE Django)
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+
+# Suivi des tâches
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_SEND_SENT_EVENT = True
+
+# Limites de temps
+CELERY_TASK_TIME_LIMIT = 30 * 60          # 30 min hard limit
+CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60     # 25 min soft limit (lève une exception)
+CELERY_TASK_ACKS_LATE = True              # acquitte après exécution (fiabilité)
+CELERY_TASK_REJECT_ON_WORKER_LOST = True  # remet en file si worker crash
+
+# Worker
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1     # 1 tâche à la fois par worker
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 100   # recycle après 100 tâches (fuites mémoire)
+CELERY_WORKER_CONCURRENCY = int(os.environ.get("CELERY_CONCURRENCY", "2"))
+
+# Files d'attente : on sépare batch (lourd) et collect (léger)
+CELERY_TASK_DEFAULT_QUEUE = "default"
+CELERY_TASK_QUEUES = {
+    "default": {"exchange": "default", "routing_key": "default"},
+    "batch":   {"exchange": "batch",   "routing_key": "batch"},
+    "collect": {"exchange": "collect", "routing_key": "collect"},
+}
+
+# Retry par défaut
+CELERY_TASK_ANNOTATIONS = {
+    "*": {
+        "max_retries": 2,
+        "default_retry_delay": 60,
+        "retry_backoff": True,
+        "retry_backoff_max": 600,
+        "retry_jitter": True,
+    },
+}
+
+# Flower (dashboard)
+CELERY_FLOWER_PORT = int(os.environ.get("FLOWER_PORT", "5555"))
+CELERY_FLOWER_BASIC_AUTH = os.environ.get("FLOWER_BASIC_AUTH", "")  # "user:pass"

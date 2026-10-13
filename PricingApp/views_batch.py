@@ -1,18 +1,13 @@
 """Vues du wizard batch : upload → verify → criteria → status → download."""
 import json
-import threading
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
-
 from .models import BatchJob, BatchLine
 from .parsers import get_parser, SUPPORTED_EXTENSIONS
-from .batch import process_batch, match_line
-
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 Mo
 MAX_LINES = 500
@@ -129,18 +124,31 @@ def batch_verify(request, job_id: int):
         job.column_mapping = mapping
 
         # Overrides manuels par ligne
+                # Overrides manuels par ligne
+        # Format attendu : override_<line_id>_<field>
+        # Ex : override_42_designation, override_42_quantity, override_42_reference
         overrides = {}
         for key, value in request.POST.items():
-            if key.startswith("override_"):
-                line_id = int(key.replace("override_", ""))
-                overrides.setdefault(line_id, {})[key.split("_", 2)[-1]] = value.strip()
+            if not key.startswith("override_"):
+                continue
+            parts = key.split("_", 2)   # ['override', '<id>', '<field>']
+            if len(parts) != 3:
+                continue
+            try:
+                line_id = int(parts[1])
+            except ValueError:
+                continue
+            field = parts[2]            # 'designation' | 'quantity' | 'reference'
+            overrides.setdefault(line_id, {})[field] = value.strip()
 
-        # Appliquer le mapping + overrides
+                # Appliquer le mapping + overrides
         for line in job.lines.all():
             raw = line.raw_data
-            desig = overrides.get(line.pk, {}).get("designation") or raw.get(mapping["designation"], "")
-            qty_raw = overrides.get(line.pk, {}).get("quantity") or raw.get(mapping["quantity"], "1")
-            ref = overrides.get(line.pk, {}).get("reference") or raw.get(mapping["reference"], "")
+            line_override = overrides.get(line.pk, {})
+
+            desig = line_override.get("designation") or raw.get(mapping["designation"], "")
+            qty_raw = line_override.get("quantity") or raw.get(mapping["quantity"], "1")
+            ref = line_override.get("reference") or raw.get(mapping["reference"], "")
 
             line.designation = str(desig).strip()[:500]
             line.reference = str(ref).strip()[:200]
@@ -151,7 +159,6 @@ def batch_verify(request, job_id: int):
                 line.quantity = 1
 
             line.save(update_fields=["designation", "quantity", "reference"])
-
         job.status = "ready"
         job.save(update_fields=["column_mapping", "status"])
 
@@ -194,12 +201,12 @@ def batch_criteria(request, job_id: int):
         job.criteria = criteria
         job.status = "processing"
         job.progress = 0
-        job.progress_message = _("Démarrage…")
+        job.progress_message = _("En attente d'un worker…")
         job.save()
 
-        # Lancer en thread (MVP — à remplacer par Celery plus tard)
-        thread = threading.Thread(target=process_batch, args=(job,), daemon=True)
-        thread.start()
+        # Envoie la tâche à Celery (retour en ~50 ms)
+        from .tasks import process_batch_task
+        process_batch_task.delay(job.pk)
 
         return redirect("PricingApp:batch_status", job_id=job.pk)
 
