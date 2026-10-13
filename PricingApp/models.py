@@ -159,3 +159,126 @@ class PurchaseIntent(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+# ==========================================================
+# BATCH PROCUREMENT (Mode D)
+# ==========================================================
+
+class BatchJob(models.Model):
+    """Une import de commande multi-lignes."""
+    STATUS_CHOICES = [
+        ("draft",       _("Brouillon")),
+        ("verifying",   _("Vérification")),
+        ("ready",       _("Prêt")),
+        ("processing",  _("Analyse en cours")),
+        ("done",        _("Terminé")),
+        ("failed",      _("Échec")),
+    ]
+
+    PRIORITY_CHOICES = [
+        ("price",     _("Prix le plus bas")),
+        ("stock",     _("Disponibilité")),
+        ("proximity", _("Proximité géographique")),
+        ("rating",    _("Meilleure note vendeur")),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="batch_jobs", verbose_name=_("Utilisateur"),
+    )
+
+    # Fichier source
+    original_file = models.FileField(
+        _("Fichier source"), upload_to="batch/%Y/%m/",
+    )
+    original_name = models.CharField(_("Nom d'origine"), max_length=255)
+    original_format = models.CharField(_("Format"), max_length=10)  # csv, xlsx, pdf, docx
+
+    # Colonnes détectées + mapping utilisateur
+    detected_columns = models.JSONField(_("Colonnes détectées"), default=list)
+    column_mapping = models.JSONField(_("Mapping"), default=dict)
+
+    # Critères de sélection
+    criteria = models.JSONField(_("Critères"), default=dict)
+
+    # Statut
+    status = models.CharField(
+        _("Statut"), max_length=16, choices=STATUS_CHOICES, default="draft",
+    )
+    progress = models.PositiveSmallIntegerField(_("Progression"), default=0)
+    progress_message = models.CharField(_("Message"), max_length=255, blank=True, default="")
+
+    # Résultat
+    output_pdf = models.FileField(
+        _("PDF généré"), upload_to="batch/output/%Y/%m/",
+        null=True, blank=True,
+    )
+    stats = models.JSONField(_("Statistiques"), default=dict)
+    error_message = models.TextField(_("Erreur"), blank=True, default="")
+
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    completed_at = models.DateTimeField(_("Terminé le"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Import batch")
+        verbose_name_plural = _("Imports batch")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Batch #{self.pk} — {self.original_name} ({self.get_status_display()})"
+
+    @property
+    def total_lines(self):
+        return self.lines.count()
+
+    @property
+    def is_terminal(self):
+        return self.status in ("done", "failed")
+
+
+class BatchLine(models.Model):
+    """Une ligne d'un import batch (un produit à sourcer)."""
+    MATCH_STATUS = [
+        ("pending",   _("En attente")),
+        ("matched",   _("Correspondance trouvée")),
+        ("ambiguous", _("Ambigu")),
+        ("not_found", _("Introuvable")),
+        ("manual",    _("Saisie manuelle")),
+    ]
+
+    job = models.ForeignKey(
+        BatchJob, on_delete=models.CASCADE,
+        related_name="lines", verbose_name=_("Import"),
+    )
+    row_number = models.PositiveIntegerField(_("N° ligne"))
+
+    # Données brutes (toutes les colonnes d'origine)
+    raw_data = models.JSONField(_("Données brutes"), default=dict)
+
+    # Données extraites / normalisées
+    designation = models.CharField(_("Désignation"), max_length=500)
+    quantity = models.PositiveIntegerField(_("Quantité"), default=1)
+    reference = models.CharField(_("Référence"), max_length=200, blank=True, default="")
+
+    # Résolution
+    product = models.ForeignKey(
+        "CatalogApp.Product", null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="batch_lines",
+    )
+    match_confidence = models.FloatField(_("Confiance"), default=0.0)
+    match_status = models.CharField(
+        _("Statut"), max_length=16, choices=MATCH_STATUS, default="pending",
+    )
+
+    # Résultats (offres trouvées)
+    best_offers = models.JSONField(_("Meilleures offres"), default=list)
+    chosen_offer = models.JSONField(_("Offre retenue"), default=dict)
+
+    class Meta:
+        verbose_name = _("Ligne batch")
+        verbose_name_plural = _("Lignes batch")
+        ordering = ["row_number"]
+        unique_together = ("job", "row_number")
+
+    def __str__(self):
+        return f"#{self.row_number} {self.designation[:50]}"

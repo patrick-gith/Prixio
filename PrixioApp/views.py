@@ -145,6 +145,17 @@ def remove_from_watchlist(request, product_id: int):
         user=request.user, product=product,
     ).delete()
 
+    # Réponse JSON si requête AJAX (swipe)
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    if is_ajax:
+        from django.http import JsonResponse
+        return JsonResponse({
+            "ok": True,
+            "deleted": deleted,
+            "product": product.title,
+        })
+
     if deleted:
         messages.info(
             request,

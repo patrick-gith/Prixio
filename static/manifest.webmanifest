@@ -1,0 +1,54 @@
+{
+  "name": "Prixio — Intelligence tarifaire",
+  "short_name": "Prixio",
+  "description": "Collez un produit. Obtenez une réponse. Achetez au bon moment.",
+  "start_url": "/?utm_source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f6f9fc",
+  "theme_color": "#635bff",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["shopping", "productivity", "finance"],
+  "icons": [
+    {
+      "src": "/static/favicons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/favicons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/favicons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Rechercher un prix",
+      "short_name": "Chercher",
+      "url": "/",
+      "icons": [{"src": "/static/favicons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Mon dashboard",
+      "short_name": "Dashboard",
+      "url": "/dashboard/",
+      "icons": [{"src": "/static/favicons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Ma veille",
+      "short_name": "Veille",
+      "url": "/watchlist/",
+      "icons": [{"src": "/static/favicons/icon-192.png", "sizes": "192x192"}]
+    }
+  ]
+}

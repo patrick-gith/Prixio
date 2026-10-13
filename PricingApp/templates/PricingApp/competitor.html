@@ -1,41 +1,81 @@
-{% extends "base.html" %}{% load i18n humanize %}
+{% extends "base.html" %}
+{% load i18n humanize %}
 {% block head_title %}{{ title }}{% endblock %}
+
 {% block content %}
-<section class="max-w-5xl mx-auto pt-8">
-  <h1 class="text-2xl font-bold mb-6">{{ title }}</h1>
+<section style="max-width:1000px;margin:0 auto;">
+
+  <div class="anim-fade-up" style="margin-bottom:22px;">
+    <h1 style="font-size:clamp(1.35rem,4vw,1.9rem);font-weight:900;
+               letter-spacing:-.8px;margin:0 0 4px;">
+      {{ title }}
+    </h1>
+    <p style="color:var(--muted);font-size:13px;margin:0;">
+      {% trans "Comparez votre prix à la médiane mondiale." %}
+    </p>
+  </div>
 
   {% if not rows %}
-    <div class="card text-center py-10">
-      <p class="text-muted text-sm">{% trans "Aucun produit en veille concurrentielle." %}</p>
+    <div class="card" style="text-align:center;padding:44px 20px;">
+      <div style="font-size:2.4rem;margin-bottom:12px;opacity:.5;">📊</div>
+      <p style="color:var(--muted);font-size:14px;margin:0;">
+        {% trans "Aucun produit en veille concurrentielle." %}
+      </p>
     </div>
   {% else %}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 stagger">
       {% for row in rows %}
         {% if row.result.has_data %}
-          <div class="card" style="border-left:4px solid
-            {% if row.result.position_pct > 5 %}var(--error-color)
-            {% elif row.result.position_pct < -5 %}var(--success-color)
-            {% else %}var(--warning-color){% endif %};">
-            <div class="font-semibold">{{ row.listing.product.title|truncatechars:35 }}</div>
-            <div class="mt-2 text-sm">
-              {% trans "Ton prix" %} : <b>{{ row.listing.my_price|floatformat:2 }} {{ row.listing.my_currency }}</b><br>
-              {% trans "Médiane marché" %} : {{ row.result.market_median_local|floatformat:2 }} {{ row.listing.my_currency }}
+          <div class="card card-hover"
+               style="--d:{{ forloop.counter0 }};padding:16px;
+                      border-left:4px solid
+                      {% if row.result.position_pct > 5 %}var(--danger)
+                      {% elif row.result.position_pct < -5 %}var(--success)
+                      {% else %}var(--warning){% endif %};">
+
+            <div class="clamp-2" style="font-weight:800;font-size:14px;
+                        letter-spacing:-.2px;line-height:1.3;margin-bottom:10px;
+                        word-break:break-word;">
+              {{ row.listing.product.title }}
             </div>
-            <div class="mt-3 text-sm"
-              style="color:{% if row.result.position_pct > 5 %}var(--error-color){% else %}var(--success-color){% endif %};">
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;
+                        gap:10px;margin-bottom:10px;">
+              <div>
+                <div style="font-size:10.5px;color:var(--muted);margin-bottom:2px;">
+                  {% trans "Votre prix" %}
+                </div>
+                <div style="font-weight:800;font-size:13.5px;">
+                  {{ row.listing.my_price|floatformat:2 }}
+                  <span style="font-size:.75em;color:var(--muted);">{{ row.listing.my_currency }}</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:10.5px;color:var(--muted);margin-bottom:2px;">
+                  {% trans "Médiane" %}
+                </div>
+                <div style="font-weight:800;font-size:13.5px;">
+                  {{ row.result.market_median_local|floatformat:2 }}
+                  <span style="font-size:.75em;color:var(--muted);">{{ row.listing.my_currency }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:12.5px;font-weight:700;
+                        color:{% if row.result.position_pct > 5 %}var(--danger){% else %}var(--success){% endif %};
+                        margin-bottom:8px;">
               {% if row.result.position_pct > 0 %}
-                ⚠️ {% trans "Tu es" %} {{ row.result.position_pct }}% {% trans "au-dessus du marché" %}
+                ⚠️ +{{ row.result.position_pct }}% {% trans "vs marché" %}
               {% else %}
-                ✅ {% trans "Tu es" %} {{ row.result.position_pct|floatformat:1 }}% {% trans "sous le marché" %}
+                ✅ {{ row.result.position_pct|floatformat:1 }}% {% trans "vs marché" %}
               {% endif %}
             </div>
-            <div class="mt-2 text-xs text-muted">
-              {% trans "Prix suggéré" %} : <b>{{ row.result.suggested_local|floatformat:2 }} {{ row.listing.my_currency }}</b>
-              · {{ row.result.rival_count }} {% trans "vendeurs comparés" %}
-            </div>
-            <div class="mt-2 text-xs">
-              {% trans "Moins cher" %} : {{ row.result.cheapest.price_local|floatformat:2 }}
-              {{ row.result.cheapest.currency }} ({{ row.result.cheapest.source }} · {{ row.result.cheapest.region }})
+
+            <div style="font-size:11.5px;color:var(--muted);padding-top:8px;
+                        border-top:1px solid var(--border);">
+              {% trans "Suggéré" %} :
+              <b style="color:var(--brand);">{{ row.result.suggested_local|floatformat:2 }} {{ row.listing.my_currency }}</b>
+              · {{ row.result.rival_count }} {% trans "offres" %}
             </div>
           </div>
         {% endif %}

@@ -1,0 +1,255 @@
+@page {
+  size: A4;
+  margin: 15mm 14mm 18mm;
+  @bottom-center {
+    content: "Page " counter(page) " / " counter(pages);
+    font-size: 8pt;
+    color: #94a3b8;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "DejaVu Sans", "Inter", sans-serif;
+  font-size: 9.5pt;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.page-break { page-break-before: always; }
+
+/* ---------- COUVERTURE ---------- */
+.cover {
+  min-height: 255mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10mm 0;
+}
+.cover-brand .brand {
+  font-size: 26pt;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: #0a0e27;
+}
+.brand-accent { color: #635bff; }
+.brand-sub {
+  font-size: 9pt;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.cover-title {
+  padding: 12mm 0;
+  border-top: 3px solid #635bff;
+  border-bottom: 3px solid #635bff;
+}
+.cover-eyebrow {
+  font-size: 9pt;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #635bff;
+  margin-bottom: 4mm;
+}
+.cover-title h1 {
+  font-size: 26pt;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin: 0 0 4mm;
+  line-height: 1.1;
+  color: #0a0e27;
+}
+.cover-ref {
+  font-family: "DejaVu Sans Mono", monospace;
+  font-size: 11pt;
+  color: #635bff;
+  font-weight: 700;
+}
+
+.cover-meta {
+  display: flex;
+  gap: 8mm;
+  margin: 8mm 0;
+}
+.meta-block { flex: 1; }
+.meta-label {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 1.5mm;
+}
+.meta-value {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: #0a0e27;
+}
+.meta-sub {
+  font-size: 8.5pt;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.cover-stats {
+  display: flex;
+  gap: 6mm;
+  padding: 8mm 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+.stat {
+  flex: 1;
+  text-align: center;
+}
+.stat-value {
+  font-size: 22pt;
+  font-weight: 900;
+  color: #635bff;
+  line-height: 1;
+  margin-bottom: 1mm;
+}
+.stat-label {
+  font-size: 8.5pt;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.cover-footer {
+  text-align: center;
+  font-size: 8.5pt;
+  color: #94a3b8;
+}
+
+/* ---------- SECTIONS ---------- */
+.section-title {
+  font-size: 15pt;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #0a0e27;
+  margin: 0 0 3mm;
+}
+.section-sub {
+  font-size: 9pt;
+  color: #64748b;
+  margin: 0 0 6mm;
+}
+
+/* ---------- FOURNISSEURS ---------- */
+.supplier-card {
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #635bff;
+  border-radius: 5px;
+  padding: 4mm 5mm;
+  margin-bottom: 5mm;
+  page-break-inside: avoid;
+}
+.supplier-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 3mm;
+  padding-bottom: 3mm;
+  border-bottom: 1px solid #e2e8f0;
+}
+.supplier-name {
+  font-size: 12pt;
+  font-weight: 800;
+  color: #0a0e27;
+}
+.supplier-region {
+  font-size: 8.5pt;
+  color: #64748b;
+  margin-top: 1px;
+}
+.supplier-total {
+  font-family: "DejaVu Sans Mono", monospace;
+  font-size: 11pt;
+  font-weight: 800;
+  color: #635bff;
+}
+
+.supplier-contact {
+  margin-bottom: 3mm;
+}
+.contact-line {
+  font-size: 8.5pt;
+  color: #334155;
+  margin-bottom: 1mm;
+}
+
+.mini-table,
+.full-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.mini-table th,
+.full-table th {
+  background: #f1f5f9;
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+  padding: 5px 6px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+.mini-table td,
+.full-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 8.5pt;
+  vertical-align: top;
+}
+.center { text-align: center; }
+.right  { text-align: right; }
+.num {
+  font-family: "DejaVu Sans Mono", monospace;
+  font-size: 8pt;
+}
+.sub {
+  font-size: 7.5pt;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+.warn { color: #f59e0b; font-weight: 700; }
+.muted { color: #94a3b8; }
+
+/* ---------- TOTAL GÉNÉRAL ---------- */
+.grand-total {
+  margin-top: 8mm;
+  padding: 5mm;
+  background: #0a0e27;
+  color: #ffffff;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.gt-label {
+  font-size: 10pt;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.gt-value {
+  font-family: "DejaVu Sans Mono", monospace;
+  font-size: 15pt;
+  font-weight: 900;
+}
+
+/* ---------- FOOTER ---------- */
+.doc-footer {
+  position: fixed;
+  bottom: -12mm;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 7.5pt;
+  color: #94a3b8;
+  padding-top: 3mm;
+  border-top: 1px solid #e2e8f0;
+}

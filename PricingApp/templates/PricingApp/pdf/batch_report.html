@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="{{ language_code }}">
+<head>
+  <meta charset="utf-8">
+  <title>Commande groupée {{ reference }}</title>
+</head>
+<body>
+
+<!-- ============ PAGE DE COUVERTURE ============ -->
+<section class="cover">
+  <div class="cover-brand">
+    <div class="brand">Prix<span class="brand-accent">io</span></div>
+    <div class="brand-sub">Intelligence tarifaire universelle</div>
+  </div>
+
+  <div class="cover-title">
+    <div class="cover-eyebrow">Dossier commande</div>
+    <h1>Rapport d'approvisionnement</h1>
+    <div class="cover-ref">{{ reference }}</div>
+  </div>
+
+  <div class="cover-meta">
+    <div class="meta-block">
+      <div class="meta-label">Émis pour</div>
+      <div class="meta-value">{{ user.username }}</div>
+      <div class="meta-sub">{{ user.email }}</div>
+    </div>
+    <div class="meta-block">
+      <div class="meta-label">Date d'émission</div>
+      <div class="meta-value">{{ issued_at|date:"d/m/Y à H:i" }}</div>
+    </div>
+    <div class="meta-block">
+      <div class="meta-label">Fichier source</div>
+      <div class="meta-value">{{ job.original_name }}</div>
+      <div class="meta-sub">{{ job.original_format|upper }}</div>
+    </div>
+  </div>
+
+  <div class="cover-stats">
+    <div class="stat">
+      <div class="stat-value">{{ stats.total }}</div>
+      <div class="stat-label">Lignes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">{{ stats.matched }}</div>
+      <div class="stat-label">Résolues</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">{{ stats.with_offers }}</div>
+      <div class="stat-label">Avec offres</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">{{ stats.not_found }}</div>
+      <div class="stat-label">Introuvables</div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    {{ company_name }} · {{ company_email }}
+  </div>
+</section>
+
+<!-- ============ PAGE 2 : MEILLEURS FOURNISSEURS ============ -->
+<section class="page-break">
+  <h2 class="section-title">Fournisseurs recommandés</h2>
+  <p class="section-sub">
+    Contacts et coordonnées des vendeurs pour joindre à votre commande.
+  </p>
+
+  {% for supplier in by_supplier %}
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">{{ supplier.name }}</div>
+          <div class="supplier-region">{{ supplier.region }}</div>
+        </div>
+        <div class="supplier-total">
+          {{ supplier.total|floatformat:2 }} {{ supplier.currency }}
+        </div>
+      </div>
+
+      <div class="supplier-contact">
+        {% if supplier.contact.email %}
+          <div class="contact-line"><b>Email :</b> {{ supplier.contact.email }}</div>
+        {% endif %}
+        {% if supplier.contact.phone %}
+          <div class="contact-line"><b>Téléphone :</b> {{ supplier.contact.phone }}</div>
+        {% endif %}
+        {% if supplier.contact.address %}
+          <div class="contact-line"><b>Adresse :</b> {{ supplier.contact.address }}</div>
+        {% endif %}
+        {% if supplier.contact.website %}
+          <div class="contact-line"><b>Site :</b> {{ supplier.contact.website }}</div>
+        {% endif %}
+      </div>
+
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th class="center">Qté</th>
+            <th class="right">Prix unitaire</th>
+            <th class="right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in supplier.products %}
+            <tr>
+              <td>{{ p.line.designation|truncatechars:60 }}</td>
+              <td class="center">{{ p.line.quantity }}</td>
+              <td class="right">{{ p.price|floatformat:2 }} {{ p.currency }}</td>
+              <td class="right">
+                {{ p.price|floatformat:2 }} × {{ p.line.quantity }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% empty %}
+    <p class="empty">Aucun fournisseur identifié.</p>
+  {% endfor %}
+</section>
+
+<!-- ============ PAGE 3 : DÉTAIL PAR PRODUIT ============ -->
+<section class="page-break">
+  <h2 class="section-title">Détail par produit</h2>
+
+  <table class="full-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Désignation</th>
+        <th class="center">Qté</th>
+        <th>Produit identifié</th>
+        <th>Meilleur vendeur</th>
+        <th class="right">Prix</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for line in lines %}
+        <tr>
+          <td class="num">{{ line.row_number }}</td>
+          <td>{{ line.designation|truncatechars:50 }}</td>
+          <td class="center">{{ line.quantity }}</td>
+          <td>
+            {% if line.product %}
+              {{ line.product.title|truncatechars:40 }}
+            {% elif line.match_status == "ambiguous" %}
+              <span class="warn">Ambigu</span>
+            {% else %}
+              <span class="muted">Non identifié</span>
+            {% endif %}
+          </td>
+          <td>
+            {% with offer=line.best_offers.0 %}
+              {% if offer.source %}
+                {{ offer.source }}
+                {% if offer.contact.email %}
+                  <div class="sub">{{ offer.contact.email }}</div>
+                {% endif %}
+              {% else %}—{% endif %}
+            {% endwith %}
+          </td>
+          <td class="right num">
+            {% with offer=line.best_offers.0 %}
+              {% if offer.price %}
+                {{ offer.price|floatformat:2 }} {{ offer.currency }}
+              {% else %}—{% endif %}
+            {% endwith %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="grand-total">
+    <div class="gt-label">Total estimé (meilleures offres)</div>
+    <div class="gt-value">{{ grand_total|floatformat:2 }} {{ currency }}</div>
+  </div>
+</section>
+
+<!-- ============ PAGE 4 : LIGNES NON RÉSOLUES ============ -->
+{% if unresolved_lines %}
+<section class="page-break">
+  <h2 class="section-title">Lignes à vérifier</h2>
+  <p class="section-sub">
+    Ces produits n'ont pas pu être identifiés automatiquement.
+    Vérifiez les désignations ou ajoutez une référence (ISBN, GTIN).
+  </p>
+
+  <table class="full-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Désignation brute</th>
+        <th class="center">Qté</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for line in unresolved_lines %}
+        <tr>
+          <td class="num">{{ line.row_number }}</td>
+          <td>{{ line.designation }}</td>
+          <td class="center">{{ line.quantity }}</td>
+          <td>
+            {% if line.match_status == "ambiguous" %}
+              <span class="warn">Ambigu — vérifier</span>
+            {% else %}
+              <span class="muted">Introuvable</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<footer class="doc-footer">
+  {{ company_name }} · {{ company_email }} · Réf. {{ reference }}
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+{% extends "base.html" %}{% load i18n %}
+{% block head_title %}{% trans "Nouvelle commande" %}{% endblock %}
+
+{% block content %}
+<section style="max-width:720px;margin:0 auto;">
+
+  <!-- Indicateur d'étapes -->
+  <div class="wizard-steps">
+    <div class="ws-item active">
+      <div class="ws-num">1</div>
+      <div class="ws-label">{% trans "Fichier" %}</div>
+    </div>
+    <div class="ws-line"></div>
+    <div class="ws-item">
+      <div class="ws-num">2</div>
+      <div class="ws-label">{% trans "Vérification" %}</div>
+    </div>
+    <div class="ws-line"></div>
+    <div class="ws-item">
+      <div class="ws-num">3</div>
+      <div class="ws-label">{% trans "Critères" %}</div>
+    </div>
+    <div class="ws-line"></div>
+    <div class="ws-item">
+      <div class="ws-num">4</div>
+      <div class="ws-label">{% trans "PDF" %}</div>
+    </div>
+  </div>
+
+  <div class="anim-fade-up" style="text-align:center;margin:32px 0 24px;">
+    <h1 style="font-size:clamp(1.4rem,4vw,2rem);font-weight:900;
+               letter-spacing:-.9px;margin:0 0 8px;line-height:1.2;">
+      {% trans "Importer votre commande" %}
+    </h1>
+    <p style="color:var(--muted);font-size:14px;margin:0;">
+      {% trans "Recevez un dossier PDF avec les meilleurs fournisseurs et leurs coordonnées." %}
+    </p>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="card card-glow"
+        style="padding:24px;">
+    {% csrf_token %}
+
+    <!-- Drop zone -->
+    <label for="fileInput" id="dropZone"
+           style="display:block;padding:36px 20px;border:2px dashed var(--border);
+                  border-radius:14px;text-align:center;cursor:pointer;
+                  transition:all .2s var(--ease-smooth);background:var(--surface-hover);">
+      <div style="font-size:2.5rem;margin-bottom:8px;">📁</div>
+      <div style="font-weight:800;font-size:15px;margin-bottom:4px;">
+        {% trans "Glissez votre fichier ici" %}
+      </div>
+      <div style="color:var(--muted);font-size:13px;">
+        {% trans "ou cliquez pour parcourir" %}
+      </div>
+      <input type="file" name="file" id="fileInput"
+             accept=".csv,.xlsx,.xls,.pdf,.docx,.doc"
+             style="display:none;" required>
+    </label>
+
+    <div id="fileInfo" style="display:none;margin-top:14px;padding:12px;
+                background:var(--brand-soft);border-radius:10px;
+                font-size:13px;align-items:center;gap:10px;">
+      <i class="fas fa-file-lines" style="color:var(--brand);"></i>
+      <span id="fileName" style="flex:1;font-weight:600;min-width:0;overflow:hidden;
+            text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button type="button" id="fileRemove" style="background:transparent;border:0;
+              cursor:pointer;color:var(--muted);padding:4px;">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Formats supportés -->
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.8px;
+                  text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
+        {% trans "Formats acceptés" %}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        {% for ext in supported %}
+          <span class="badge badge-primary" style="font-size:11px;">
+            .{{ ext }}
+          </span>
+        {% endfor %}
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:10px;">
+        {% trans "Max" %} {{ max_size_mb }} Mo · {{ max_lines }} {% trans "lignes" %}
+      </div>
+    </div>
+
+    <button type="submit" id="submitBtn" class="btn btn-primary"
+            style="width:100%;margin-top:20px;padding:14px;"
+            disabled>
+      <i class="fas fa-arrow-right"></i>
+      {% trans "Analyser le fichier" %}
+    </button>
+  </form>
+
+  <!-- Lien vers la saisie manuelle -->
+  <div style="text-align:center;margin-top:20px;">
+    <a href="{% url 'CoreApp:home' %}"
+       style="font-size:13px;color:var(--muted);text-decoration:none;">
+      {% trans "Ou saisir un seul produit" %} <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+</section>
+
+<style>
+  .wizard-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  .ws-item { text-align: center; flex-shrink: 0; }
+  .ws-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--muted);
+    font-weight: 800;
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 4px;
+    transition: all .3s var(--ease-spring);
+  }
+  .ws-item.active .ws-num {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(99,91,255,.35);
+  }
+  .ws-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .ws-item.active .ws-label { color: var(--brand); }
+  .ws-line {
+    width: 24px;
+    height: 2px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+  @media (max-width: 400px) {
+    .ws-line { width: 12px; }
+    .ws-label { font-size: 9.5px; }
+  }
+  #dropZone.dragover {
+    border-color: var(--brand);
+    background: var(--brand-soft);
+    transform: scale(1.01);
+  }
+</style>
+
+<script>
+(function(){
+  const input = document.getElementById('fileInput');
+  const zone  = document.getElementById('dropZone');
+  const info  = document.getElementById('fileInfo');
+  const name  = document.getElementById('fileName');
+  const rm    = document.getElementById('fileRemove');
+  const btn   = document.getElementById('submitBtn');
+
+  function showFile(f) {
+    if (!f) return;
+    name.textContent = f.name + ' · ' + (f.size / 1024).toFixed(1) + ' Ko';
+    info.style.display = 'flex';
+    btn.disabled = false;
+  }
+
+  function clearFile() {
+    input.value = '';
+    info.style.display = 'none';
+    btn.disabled = true;
+  }
+
+  input.addEventListener('change', () => showFile(input.files[0]));
+  rm.addEventListener('click', (e) => { e.preventDefault(); clearFile(); });
+
+  ['dragenter', 'dragover'].forEach(ev => {
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(ev => {
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+    });
+  });
+  zone.addEventListener('drop', (e) => {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      input.files = files;
+      showFile(files[0]);
+    }
+  });
+})();
+</script>
+{% endblock %}

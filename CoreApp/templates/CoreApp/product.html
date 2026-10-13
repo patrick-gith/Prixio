@@ -4,113 +4,200 @@
 {% block head_title %}{{ product.title }}{% endblock %}
 
 {% block content %}
-<section class="max-w-3xl mx-auto pt-8">
+<section style="max-width:800px;margin:0 auto;">
 
-  <a href="{% url 'CoreApp:home' %}" class="text-sm" style="color:var(--brand-color);">
-    ← {% trans "Nouvelle recherche" %}
+  <a href="{% url 'CoreApp:home' %}" class="btn btn-sm btn-secondary"
+     style="margin-bottom:16px;">
+    <i class="fas fa-arrow-left"></i> {% trans "Nouvelle recherche" %}
   </a>
 
-  <div class="mt-6 flex items-start gap-4">
+  <!-- Produit header -->
+  <div class="card anim-fade-up" style="padding:20px;margin-bottom:16px;
+              display:flex;gap:14px;align-items:flex-start;">
     {% if product.image_url %}
       <img src="{{ product.image_url }}" alt=""
-           style="width:80px;height:80px;object-fit:contain;border-radius:12px;
-                  background:#fff;border:1px solid var(--input-border);padding:8px;">
+           style="width:64px;height:64px;object-fit:contain;border-radius:12px;
+                  background:var(--surface);border:1px solid var(--border);
+                  padding:6px;flex-shrink:0;">
     {% endif %}
-    <div>
-      <h1 class="text-2xl font-bold">{{ product.title }}</h1>
-      {% if product.brand %}<div class="text-sm text-muted">{{ product.brand }}</div>{% endif %}
-      <div class="text-xs text-muted mt-1">
+    <div style="min-width:0;flex:1;">
+      <h1 class="clamp-2"
+          style="font-size:clamp(1.1rem,3.5vw,1.5rem);font-weight:900;
+                 letter-spacing:-.6px;margin:0 0 4px;line-height:1.25;
+                 word-break:break-word;">
+        {{ product.title }}
+      </h1>
+      {% if product.brand %}
+        <div style="font-size:13px;color:var(--muted);">{{ product.brand }}</div>
+      {% endif %}
+      <div style="font-size:11px;color:var(--muted);margin-top:3px;
+                  font-family:'JetBrains Mono',monospace;">
         {{ product.primary_id }} · {{ product.get_canonical_type_display }}
       </div>
     </div>
   </div>
 
   {% if not analysis.has_data %}
-    <div class="mt-10 card" style="background:rgba(255,184,0,.08);border:1px solid rgba(255,184,0,.3);">
-      <div class="font-semibold">{% trans "Pas encore de données de prix" %}</div>
-      <div class="text-sm text-muted mt-1">
+    <div class="card" style="background:var(--warning-soft);
+                border:1px solid color-mix(in srgb, var(--warning) 30%, transparent);
+                padding:18px;">
+      <div style="font-weight:700;font-size:14px;">{% trans "Pas encore de données" %}</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:4px;">
         {% trans "Essayez un livre (ISBN) ou une crypto." %}
       </div>
     </div>
   {% else %}
 
-    <div class="mt-8 card">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;">
-        <div>
-          <div class="text-sm text-muted">{% trans "Score d'opportunité" %}</div>
-          <div style="font-size:2rem;font-weight:700;margin-top:4px;">
-            {{ analysis.score }}<span class="text-muted" style="font-size:1rem;">/100</span>
+    <!-- Score card -->
+    <div class="card anim-scale" style="margin-bottom:14px;padding:20px;">
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+
+        <div class="score-ring" data-score="{{ analysis.score }}" style="width:80px;height:80px;">
+          <svg viewBox="0 0 68 68" width="80" height="80">
+            <circle class="track" cx="34" cy="34" r="30"></circle>
+            <circle class="fill" cx="34" cy="34" r="30"></circle>
+          </svg>
+          <div class="value" style="font-size:20px;">
+            <span data-count-to="{{ analysis.score }}" data-decimals="0">0</span>
           </div>
         </div>
-        <div style="font-size:1.4rem;">{{ analysis.label }}</div>
+
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;
+                      text-transform:uppercase;color:var(--muted);margin-bottom:4px;">
+            {% trans "Score d'opportunité" %}
+          </div>
+          <div style="font-size:clamp(1.5rem,5vw,2rem);font-weight:900;
+                      letter-spacing:-1px;line-height:1;">
+            {{ analysis.score }}<span style="font-size:.65em;color:var(--muted);font-weight:700;">/100</span>
+          </div>
+          <div style="font-size:13px;color:var(--text-soft);margin-top:3px;">
+            {{ analysis.label }}
+            {% if analysis.deviation_pct > 0 %}
+              <span style="color:var(--success);font-weight:700;">
+                · -{{ analysis.deviation_pct }}%
+              </span>
+            {% endif %}
+          </div>
+        </div>
       </div>
 
-      <div class="mt-6 grid grid-cols-2 gap-4 text-sm">
+      <div style="margin-top:18px;display:grid;
+                  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;">
         <div>
-          <div class="text-muted">{% trans "Prix actuel" %}</div>
-          <div class="font-semibold" style="font-size:1.1rem;">
-            {{ analysis.current_price|floatformat:2 }} {{ analysis.currency }}
+          <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">
+            {% trans "Prix actuel" %}
+          </div>
+          <div style="font-size:1.05rem;font-weight:800;letter-spacing:-.3px;">
+            {{ analysis.current_price|floatformat:2 }}
+            <span style="font-size:.7em;color:var(--muted);font-weight:600;">{{ analysis.currency }}</span>
           </div>
         </div>
         <div>
-          <div class="text-muted">{% trans "Prix habituel (médiane 90j)" %}</div>
-          <div class="font-semibold" style="font-size:1.1rem;">
-            {{ analysis.baseline.median|floatformat:2 }} {{ analysis.currency }}
+          <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">
+            {% trans "Médiane 90 j" %}
+          </div>
+          <div style="font-size:1.05rem;font-weight:800;letter-spacing:-.3px;">
+            {{ analysis.baseline.median|floatformat:2 }}
+            <span style="font-size:.7em;color:var(--muted);font-weight:600;">{{ analysis.currency }}</span>
           </div>
         </div>
       </div>
-
-      {% if analysis.deviation_pct > 0 %}
-        <div class="mt-4 text-sm" style="color:var(--success-color);">
-          {{ analysis.deviation_pct }}% {% trans "moins cher que d'habitude" %}
-        </div>
-      {% endif %}
     </div>
 
-    <div class="mt-4 card">
-      <div class="text-sm text-muted">{% trans "Meilleure offre actuelle" %}</div>
-      <div class="mt-1" style="display:flex;justify-content:space-between;align-items:baseline;">
-        <div class="font-semibold" style="font-size:1.1rem;">
-          {{ analysis.best_offer.price|floatformat:2 }} {{ analysis.best_offer.currency }}
+    <!-- Best offer -->
+    <div class="card" style="margin-bottom:14px;padding:18px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.8px;
+                  text-transform:uppercase;color:var(--muted);margin-bottom:8px;">
+        {% trans "Meilleure offre" %}
+      </div>
+      <div class="row-between">
+        <div style="font-size:1.15rem;font-weight:800;letter-spacing:-.4px;">
+          {{ analysis.best_offer.price|floatformat:2 }}
+          <span style="font-size:.7em;color:var(--muted);font-weight:600;">{{ analysis.best_offer.currency }}</span>
         </div>
-        <div class="text-sm text-muted">
+        <div class="badge badge-primary" style="font-size:10.5px;">
           {{ analysis.best_offer.source }} · {{ analysis.best_offer.region }}
         </div>
       </div>
     </div>
 
+    <!-- Watchlist CTA -->
     {% if user.is_authenticated %}
-    <div class="mt-4">
-      <a href="{% url 'PrixioApp:add_to_watchlist' product.id %}" class="btn btn-primary">
-        <i class="fas fa-eye"></i> {% trans "Ajouter à ma veille" %}
-      </a>
-    </div>
+      <div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="{% url 'PrixioApp:add_to_watchlist' product.id %}?next={{ request.path }}"
+           class="btn btn-primary" style="flex:1;min-width:180px;">
+          <i class="fas fa-eye"></i> {% trans "Ajouter à ma veille" %}
+        </a>
+      </div>
+    {% else %}
+      <div class="card" style="margin-bottom:14px;padding:16px;text-align:center;
+                  background:var(--brand-soft);border:1px solid var(--brand-ring);">
+        <div style="font-size:13px;color:var(--text-soft);margin-bottom:10px;">
+          {% trans "Créez un compte pour suivre ce produit." %}
+        </div>
+        <a href="{% url 'register' %}" class="btn btn-primary btn-sm">
+          {% trans "Créer un compte" %}
+        </a>
+      </div>
     {% endif %}
 
-    <div class="mt-6 card">
-      <div class="text-sm text-muted mb-4">{% trans "Historique des prix" %}</div>
-      <table style="width:100%;font-size:.875rem;border-collapse:collapse;">
-        <thead class="text-muted" style="text-align:left;border-bottom:1px solid var(--input-border);">
-          <tr>
-            <th style="padding:8px 0;">{% trans "Date" %}</th>
-            <th style="padding:8px 0;">{% trans "Source" %}</th>
-            <th style="padding:8px 0;text-align:right;">{% trans "Prix" %}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for h in analysis.history %}
-            <tr style="border-bottom:1px solid var(--input-border);">
-              <td style="padding:8px 0;">{{ h.date }}</td>
-              <td style="padding:8px 0;">{{ h.source }}</td>
-              <td style="padding:8px 0;text-align:right;">
-                {{ h.price|floatformat:2 }} {{ analysis.currency }}
-              </td>
+    <!-- History -->
+    <div class="card" style="padding:18px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.8px;
+                  text-transform:uppercase;color:var(--muted);margin-bottom:14px;">
+        {% trans "Historique" %}
+      </div>
+
+      <!-- Desktop table -->
+      <div class="hide-below-sm">
+        <table style="width:100%;font-size:13px;border-collapse:collapse;">
+          <thead style="text-align:left;color:var(--muted);
+                        border-bottom:1px solid var(--border);">
+            <tr>
+              <th style="padding:7px 0;font-weight:700;font-size:11px;">{% trans "Date" %}</th>
+              <th style="padding:7px 0;font-weight:700;font-size:11px;">{% trans "Source" %}</th>
+              <th style="padding:7px 0;font-weight:700;font-size:11px;text-align:right;">{% trans "Prix" %}</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for h in analysis.history %}
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:8px 0;">{{ h.date }}</td>
+                <td style="padding:8px 0;color:var(--muted);">{{ h.source }}</td>
+                <td style="padding:8px 0;text-align:right;font-family:'JetBrains Mono',monospace;">
+                  {{ h.price|floatformat:2 }} {{ analysis.currency }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile list -->
+      <div class="show-below-sm" style="display:none;flex-direction:column;gap:10px;">
+        {% for h in analysis.history %}
+          <div style="display:flex;justify-content:space-between;
+                      align-items:center;gap:10px;font-size:13px;">
+            <div style="min-width:0;">
+              <div style="color:var(--muted);font-size:11px;">{{ h.date }}</div>
+              <div class="truncate" style="font-weight:600;max-width:160px;">{{ h.source }}</div>
+            </div>
+            <div style="font-weight:700;font-family:'JetBrains Mono',monospace;font-size:12.5px;">
+              {{ h.price|floatformat:2 }} {{ analysis.currency }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
     </div>
 
   {% endif %}
 </section>
+
+<style>
+  @media (max-width: 550px) {
+    .hide-below-sm { display: none !important; }
+    .show-below-sm { display: flex !important; }
+  }
+</style>
 {% endblock %}

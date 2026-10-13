@@ -1,0 +1,93 @@
+{% extends "base.html" %}{% load i18n %}
+{% block head_title %}{% trans "Analyse en cours" %}{% endblock %}
+
+{% block content %}
+<section style="max-width:600px;margin:40px auto;text-align:center;">
+
+  <div style="font-size:3rem;margin-bottom:20px;
+              animation:float 3s ease-in-out infinite;">⚙️</div>
+
+  <h1 style="font-size:clamp(1.3rem,3.5vw,1.7rem);font-weight:900;
+             letter-spacing:-.7px;margin:0 0 8px;">
+    {% trans "Analyse en cours" %}
+  </h1>
+  <p style="color:var(--muted);font-size:14px;margin:0 0 32px;">
+    {% trans "Nous recherchons les meilleurs fournisseurs pour chaque ligne." %}
+  </p>
+
+  <div class="card" style="padding:24px;text-align:left;">
+    <!-- Barre de progression -->
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;
+                  font-size:11.5px;font-weight:700;
+                  margin-bottom:8px;color:var(--text-soft);">
+        <span>{% trans "Progression" %}</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div style="height:8px;background:var(--border);border-radius:999px;overflow:hidden;">
+        <div id="progressBar" style="height:100%;width:0%;
+                    background:linear-gradient(90deg,var(--brand),var(--brand-2),var(--brand-3));
+                    background-size:200% 100%;
+                    animation:gradientShift 3s linear infinite;
+                    transition:width .5s ease-out;
+                    border-radius:999px;"></div>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div id="progressMsg" style="font-size:13px;color:var(--muted);min-height:20px;">
+      {% trans "Initialisation…" %}
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--muted);margin-top:24px;">
+    {% trans "Vous pouvez fermer cette page. Le traitement continue en arrière-plan." %}
+  </p>
+
+  <div id="errorBox" style="display:none;margin-top:20px;padding:14px;
+              background:var(--danger-soft);border-radius:10px;
+              font-size:13px;color:var(--danger);">
+  </div>
+</section>
+
+<script>
+(function(){
+  const url = "{% url 'PricingApp:batch_status_json' job.id %}";
+  const bar = document.getElementById('progressBar');
+  const pct = document.getElementById('progressPct');
+  const msg = document.getElementById('progressMsg');
+  const err = document.getElementById('errorBox');
+
+  async function poll() {
+    try {
+      const r = await fetch(url, { credentials: 'same-origin' });
+      const data = await r.json();
+
+      bar.style.width = data.progress + '%';
+      pct.textContent = data.progress + '%';
+      msg.textContent = data.message || '…';
+
+      if (data.status === 'done' && data.redirect) {
+        bar.style.width = '100%';
+        pct.textContent = '100%';
+        msg.textContent = "{% trans 'Terminé !' %}";
+        setTimeout(() => { window.location.href = data.redirect; }, 600);
+        return;
+      }
+
+      if (data.status === 'failed') {
+        err.style.display = 'block';
+        err.innerHTML = '<b>{% trans "Erreur" %} :</b> ' + (data.message || '{% trans "Le traitement a échoué." %}');
+        return;
+      }
+
+      setTimeout(poll, 1500);
+    } catch (e) {
+      setTimeout(poll, 3000);
+    }
+  }
+
+  poll();
+})();
+</script>
+{% endblock %}

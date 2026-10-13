@@ -1,0 +1,160 @@
+{% extends "base.html" %}{% load i18n %}
+{% block head_title %}{% trans "Vérification" %}{% endblock %}
+
+{% block content %}
+<section style="max-width:900px;margin:0 auto;">
+
+  <div class="wizard-steps">
+    <div class="ws-item done"><div class="ws-num">✓</div><div class="ws-label">{% trans "Fichier" %}</div></div>
+    <div class="ws-line"></div>
+    <div class="ws-item active"><div class="ws-num">2</div><div class="ws-label">{% trans "Vérification" %}</div></div>
+    <div class="ws-line"></div>
+    <div class="ws-item"><div class="ws-num">3</div><div class="ws-label">{% trans "Critères" %}</div></div>
+    <div class="ws-line"></div>
+    <div class="ws-item"><div class="ws-num">4</div><div class="ws-label">{% trans "PDF" %}</div></div>
+  </div>
+
+  <div class="anim-fade-up" style="margin:28px 0 20px;">
+    <h1 style="font-size:clamp(1.3rem,3.5vw,1.7rem);font-weight:900;
+               letter-spacing:-.7px;margin:0 0 6px;">
+      {% trans "Vérifiez les données" %}
+    </h1>
+    <p style="color:var(--muted);font-size:13.5px;margin:0;">
+      {{ total_lines }} {% trans "lignes détectées" %} ·
+      {% trans "Colonnes :" %} {{ columns|join:", " }}
+    </p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- Mapping des colonnes -->
+    <div class="card" style="padding:20px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.8px;
+                  text-transform:uppercase;color:var(--muted);margin-bottom:14px;">
+        {% trans "Associez les colonnes" %}
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;
+                        margin-bottom:6px;color:var(--text-soft);">
+            {% trans "Désignation" %} *
+          </label>
+          <select name="col_designation" class="form-input" required>
+            <option value="">— {% trans "Choisir" %} —</option>
+            {% for col in columns %}
+              <option value="{{ col }}" {% if col == mapping.designation %}selected{% endif %}>
+                {{ col }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;
+                        margin-bottom:6px;color:var(--text-soft);">
+            {% trans "Quantité" %}
+          </label>
+          <select name="col_quantity" class="form-input">
+            <option value="">— {% trans "Aucune" %} —</option>
+            {% for col in columns %}
+              <option value="{{ col }}" {% if col == mapping.quantity %}selected{% endif %}>
+                {{ col }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;
+                        margin-bottom:6px;color:var(--text-soft);">
+            {% trans "Référence" %}
+          </label>
+          <select name="col_reference" class="form-input">
+            <option value="">— {% trans "Aucune" %} —</option>
+            {% for col in columns %}
+              <option value="{{ col }}" {% if col == mapping.reference %}selected{% endif %}>
+                {{ col }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aperçu + override manuel -->
+    <div class="card" style="padding:20px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.8px;
+                  text-transform:uppercase;color:var(--muted);margin-bottom:14px;">
+        {% trans "Aperçu" %}
+        {% if has_more %}
+          <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted);">
+            (20 premières lignes sur {{ total_lines }})
+          </span>
+        {% endif %}
+      </div>
+
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table style="width:100%;font-size:13px;border-collapse:collapse;min-width:600px;">
+          <thead style="text-align:left;color:var(--muted);border-bottom:1px solid var(--border);">
+            <tr>
+              <th style="padding:6px;font-size:10.5px;font-weight:700;">#</th>
+              <th style="padding:6px;font-size:10.5px;font-weight:700;">{% trans "Désignation" %}</th>
+              <th style="padding:6px;font-size:10.5px;font-weight:700;width:80px;">{% trans "Qté" %}</th>
+              <th style="padding:6px;font-size:10.5px;font-weight:700;">{% trans "Référence" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for line in preview_lines %}
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:6px;color:var(--muted);font-family:monospace;">{{ line.row_number }}</td>
+                <td style="padding:6px;">
+                  <input type="text" name="override_{{ line.id }}_designation"
+                         class="form-input" style="padding:8px 10px;font-size:13px;"
+                         value="{{ line.designation|default:'' }}"
+                         placeholder="{{ line.raw_data|dictsort:''|first|default:'' }}">
+                </td>
+                <td style="padding:6px;">
+                  <input type="number" name="override_{{ line.id }}_quantity"
+                         class="form-input" style="padding:8px 10px;font-size:13px;"
+                         value="{{ line.quantity|default:1 }}" min="1">
+                </td>
+                <td style="padding:6px;">
+                  <input type="text" name="override_{{ line.id }}_reference"
+                         class="form-input" style="padding:8px 10px;font-size:13px;"
+                         value="{{ line.reference|default:'' }}">
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;">
+      <a href="{% url 'PricingApp:batch_new' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> {% trans "Retour" %}
+      </a>
+      <button type="submit" class="btn btn-primary">
+        {% trans "Continuer" %} <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </form>
+</section>
+
+<style>
+  .wizard-steps { display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;overflow-x:auto; }
+  .ws-item { text-align:center;flex-shrink:0; }
+  .ws-num { width:30px;height:30px;border-radius:50%;background:var(--border);color:var(--muted);
+            font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;
+            margin:0 auto 4px;transition:all .3s var(--ease-spring); }
+  .ws-item.active .ws-num { background:linear-gradient(135deg,var(--brand),var(--brand-2));
+                            color:#fff;box-shadow:0 4px 12px rgba(99,91,255,.35); }
+  .ws-item.done .ws-num { background:var(--success);color:#fff; }
+  .ws-label { font-size:10.5px;font-weight:700;color:var(--muted);white-space:nowrap; }
+  .ws-item.active .ws-label { color:var(--brand); }
+  .ws-line { width:24px;height:2px;background:var(--border);flex-shrink:0; }
+  @media (max-width:400px) { .ws-line { width:12px; } .ws-label { font-size:9.5px; } }
+</style>
+{% endblock %}

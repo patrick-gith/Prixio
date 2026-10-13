@@ -1,11 +1,14 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
-
+import json
+from pathlib import Path
+from django.conf import settings
+from django.http import HttpResponse, FileResponse
+from django.views.decorators.cache import cache_control
 from CatalogApp.services import get_or_create_product
 from PricingApp.services import collect_prices_for
 from PricingApp.analysis import analyze_product
-
 from .forms import SearchForm
 
 
@@ -47,3 +50,40 @@ def analyze(request, identifier: str):
         "product": product,
         "analysis": analysis,
     })
+
+
+
+@cache_control(max_age=3600)
+def manifest(request):
+    """Renvoie le manifest PWA avec le bon MIME type."""
+    manifest_path = Path(settings.BASE_DIR) / "static" / "manifest.webmanifest"
+    try:
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return HttpResponse("{}", content_type="application/manifest+json")
+
+    # Injecter les URLs dynamiques
+    data.setdefault("start_url", "/")
+    data.setdefault("scope", "/")
+    return HttpResponse(
+        json.dumps(data, ensure_ascii=False),
+        content_type="application/manifest+json",
+    )
+
+
+def service_worker(request):
+    """
+    Sert le service-worker.js depuis la RACINE (obligatoire pour qu'il
+    contrôle tout le scope du site).
+    """
+    sw_path = Path(settings.BASE_DIR) / "static" / "service-worker.js"
+    try:
+        response = FileResponse(
+            open(sw_path, "rb"),
+            content_type="application/javascript",
+        )
+        response["Service-Worker-Allowed"] = "/"
+        response["Cache-Control"] = "no-cache"
+        return response
+    except FileNotFoundError:
+        return HttpResponse("", content_type="application/javascript")
