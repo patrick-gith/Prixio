@@ -117,7 +117,7 @@ WSGI_APPLICATION = "ProjectPrixio.wsgi.application"
 # BASE DE DONNÉES
 # ==========================================================
 
-DATABASE_URL = os.environ.get("NEON_DATABASE_URL")
+DATABASE_URL = os.environ.get("RENDER_DATABASE_URL")
 
 if DATABASE_URL:
     import dj_database_url
@@ -128,11 +128,15 @@ if DATABASE_URL:
     }
 else:
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Prixiodb',
+        'USER': 'guizo',
+        'PASSWORD': '1234',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
+}
 
 # ==========================================================
 # AUTHENTIFICATION

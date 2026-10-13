@@ -1,0 +1,47 @@
+# .github/workflows/deploy.yml
+name: 🚀 Deploy to Render
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Permet un déclenchement manuel
+
+jobs:
+  # Étape 1 : Tests et vérifications
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: 📦 Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt # Pour pytest, etc.
+      
+      - name: ✅ Run tests
+        env:
+          DJANGO_SECRET_KEY: test-secret-key-for-ci
+          DEBUG: "False"
+          NEON_DATABASE_URL: postgres://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          python manage.py check
+          pytest --cov=PricingApp --cov-report=term
+
+  # Étape 2 : Déploiement sur Render
+  deploy:
+    needs: test # Ne se lance que si les tests passent
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Trigger Render Deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+        # RENDER_DEPLOY_HOOK est à configurer dans les secrets GitHub
+        # (Settings → Secrets and variables → Actions)

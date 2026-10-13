@@ -1,0 +1,20 @@
+# .github/workflows/keep-alive.yml
+name: 💓 Keep Render Alive
+
+on:
+  schedule:
+    - cron: '*/9 * * * *' # Toutes les 9 minutes
+  workflow_dispatch: # Permet un déclenchement manuel
+
+jobs:
+  keep_alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 💓 Ping Render Health Endpoint
+        run: |
+          # Remplacez par l'URL de votre service Render
+          # Utilisez un endpoint léger comme /healthz/ ou / (racine)
+          curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" \
+            https://prixio.onrender.com/healthz/ || true
+        # Le `|| true` évite que le workflow échoue si le service
+        # met du temps à démarrer (cold start)
