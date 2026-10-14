@@ -1,0 +1,55 @@
+# .github/workflows/celery-beat.yml
+name: ⏰ Celery Beat
+
+on:
+  schedule:
+    # Toutes les heures à la minute 0
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: celery-beat
+  cancel-in-progress: false
+
+jobs:
+  beat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: ⏰ Dispatch scheduled tasks
+        env:
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          DEBUG: "False"
+          RENDER_DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          ALLOWED_HOSTS: ".onrender.com,localhost"
+        run: |
+          echo "⏰ Vérification de l'heure UTC…"
+          HOUR=$(date -u +%H)
+          echo "Heure UTC : $HOUR"
+          
+          # Déclenche la collecte quotidienne à 3h du matin UTC
+          if [ "$HOUR" = "03" ]; then
+            echo "🔄 Dispatch collect_all_prices..."
+            python manage.py shell -c "
+          from PricingApp.tasks import collect_all_prices_task
+          result = collect_all_prices_task.delay()
+          print(f'Tâche envoyée : {result.id}')
+          "
+          else
+            echo "⏭ Pas l'heure (3h UTC). Skip."
+          fi

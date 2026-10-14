@@ -1,0 +1,72 @@
+# .github/workflows/celery-worker.yml
+name: 🔄 Celery Worker
+
+on:
+  schedule:
+    # Toutes les 5 minutes, mais GitHub peut retarder jusqu'à 15 min
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Lancement manuel
+
+# Empêche deux workers simultanés (ils se marcheraient dessus sur Redis)
+concurrency:
+  group: celery-worker
+  cancel-in-progress: false
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6  # Kill le job si le worker ne s'arrête pas
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: 📦 Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b \
+            libcairo2 libgdk-pixbuf-2.0-0 libopenjp2-7 fonts-dejavu-core
+
+      - name: 📦 Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🔄 Run Celery worker for 4 minutes
+        env:
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          DEBUG: "False"
+          RENDER_DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+          EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ALLOWED_HOSTS: ".onrender.com,localhost"
+        run: |
+          echo "🚀 Démarrage du worker Celery pour 4 minutes…"
+          # --concurrency=2 : 2 tâches en parallèle
+          # timeout 240    : kill après 4 minutes (SIGTERM, puis SIGKILL)
+          timeout --signal=SIGTERM 240 \
+            celery -A ProjectPrixio worker \
+              -l info \
+              -Q batch,collect,default \
+              --concurrency=2 \
+              --without-gossip \
+              --without-mingle \
+              --without-heartbeat \
+              || EXIT_CODE=$?
+          
+          # Exit code 124 = timeout (attendu). Les autres = vraie erreur.
+          if [ "${EXIT_CODE:-0}" = "124" ]; then
+            echo "✅ Worker arrêté proprement après 4 min"
+            exit 0
+          elif [ "${EXIT_CODE:-0}" != "0" ]; then
+            echo "❌ Worker a échoué avec code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
