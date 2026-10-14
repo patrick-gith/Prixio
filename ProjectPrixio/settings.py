@@ -246,10 +246,9 @@ DEFAULT_ALERT_THRESHOLD = 75
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_BOT_USERNAME = os.environ.get("TELEGRAM_BOT_USERNAME", "")
-EBAY_CLIENT_ID='ton_app_id'
-EBAY_CLIENT_SECRET='ton_cert_id'
-EBAY_MARKETPLACE_ID='EBAY_FR'
-
+EBAY_CLIENT_ID = os.environ.get("EBAY_CLIENT_ID", "")
+EBAY_CLIENT_SECRET = os.environ.get("EBAY_CLIENT_SECRET", "")
+EBAY_MARKETPLACE_ID = os.environ.get("EBAY_MARKETPLACE_ID", "EBAY_FR")
 # ==========================================================
 # CELERY — Traitement asynchrone
 # ==========================================================
