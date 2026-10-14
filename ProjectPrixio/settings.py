@@ -199,7 +199,14 @@ else:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
+# ==========================================================
+# SPÉCIFIQUE PRIXIO
+# ==========================================================
 
+BASE_CURRENCY = os.environ.get("BASE_CURRENCY", "EUR")
+
+COMPANY_NAME = os.environ.get("COMPANY_NAME", "Prixio")
+COMPANY_EMAIL = os.environ.get("COMPANY_EMAIL", "contact@prixio.app")
 # ==========================================================
 # SÉCURITÉ HTTPS
 # ==========================================================
@@ -214,10 +221,6 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
-COMPANY_EMAIL = os.environ.get(
-    "COMPANY_EMAIL",
-    "contact@monsite.com"
-)
 
 # Remplace EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 if DEBUG:
@@ -232,14 +235,7 @@ else:
 
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", COMPANY_EMAIL)
 
-# ==========================================================
-# SPÉCIFIQUE PRIXIO
-# ==========================================================
 
-BASE_CURRENCY = os.environ.get("BASE_CURRENCY", "EUR")
-
-COMPANY_NAME = os.environ.get("COMPANY_NAME", "Prixio")
-COMPANY_EMAIL = os.environ.get("COMPANY_EMAIL", "contact@prixio.app")
 
 # Score d'opportunité minimum pour déclencher une alerte
 DEFAULT_ALERT_THRESHOLD = 75
@@ -310,3 +306,8 @@ CELERY_TASK_ANNOTATIONS = {
 # Flower (dashboard)
 CELERY_FLOWER_PORT = int(os.environ.get("FLOWER_PORT", "5555"))
 CELERY_FLOWER_BASIC_AUTH = os.environ.get("FLOWER_BASIC_AUTH", "")  # "user:pass"
+# ==========================================================
+# CELERY — Worker state
+# ==========================================================
+# Nécessaire pour Celery 5.4+ : sinon AttributeError sur `worker_state_db`
+CELERY_WORKER_STATE_DB = os.environ.get("CELERY_WORKER_STATE_DB", "")
