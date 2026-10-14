@@ -4,6 +4,7 @@ from .coingecko import CoinGeckoAdapter
 from .google_books import GoogleBooksAdapter
 from .steam import SteamAdapter
 from .ebay import EbayAdapter
+from .openfoodfacts import OpenFoodFactsAdapter  # <-- Ajout
 
 ALL_ADAPTERS = [
     CoinGeckoAdapter(),
@@ -14,6 +15,7 @@ ALL_ADAPTERS = [
     EbayAdapter(region="DE"),
     EbayAdapter(region="US"),
     SteamAdapter(),
+    OpenFoodFactsAdapter(),  # <-- Ajout
 ]
 
 def get_adapters_for(product):
