@@ -11,7 +11,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ==========================================================
 # SÉCURITÉ
 # ==========================================================
+# ==========================================================
+# DÉTECTION DU MODE
+# ==========================================================
 
+import sys
+
+# Test mode : pytest ou manage.py test en cours d'exécution
+IS_TESTING = (
+    "pytest" in sys.modules
+    or "test" in sys.argv
+    or os.environ.get("DJANGO_TESTING") == "1"
+)
 LOCAL_SECRET_KEY = "django-insecure-local-dev-only-change-this"
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", LOCAL_SECRET_KEY)
 
@@ -67,14 +78,12 @@ INSTALLED_APPS = [
     "CoreApp",
     "PrixioApp",
 ]
-
 # ==========================================================
 # MIDDLEWARE
 # ==========================================================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -85,6 +94,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# WhiteNoise sert les statiques uniquement en production
+if not DEBUG and not IS_TESTING:
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 # ==========================================================
 # URLS ET TEMPLATES
 # ==========================================================
@@ -184,8 +196,12 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # En DEV / tests : storage simple, pas de manifest, pas de hash.
-# En PROD   : Manifest + compression via WhiteNoise.
-if DEBUG:
+# ==========================================================
+# FICHIERS STATIQUES ET MÉDIAS
+# ==========================================================
+
+if DEBUG or IS_TESTING:
+    # Dev et tests : storage simple, pas de manifest, pas de hash
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "staticfiles": {
@@ -193,6 +209,7 @@ if DEBUG:
         },
     }
 else:
+    # Production : Manifest + compression via WhiteNoise
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "staticfiles": {
@@ -210,8 +227,13 @@ COMPANY_EMAIL = os.environ.get("COMPANY_EMAIL", "contact@prixio.app")
 # ==========================================================
 # SÉCURITÉ HTTPS
 # ==========================================================
+# ==========================================================
+# SÉCURITÉ HTTPS
+# ==========================================================
 
-if not DEBUG:
+# On force HTTPS en production SAUF pendant les tests
+# (les tests utilisent http://testserver, pas https://)
+if not DEBUG and not IS_TESTING:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
