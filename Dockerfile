@@ -79,8 +79,14 @@ RUN mkdir -p /app/staticfiles /app/media /app/logs && \
 
 USER prixio
 
-# Collecter les statiques (nécessite SECRET_KEY pour ne pas crasher)
+# Collecter les statiques.
+# ⚠️ DEBUG=False est ESSENTIEL : sans lui, Django utilise
+# StaticFilesStorage en dev (pas de manifest), alors que le runtime
+# tourne avec CompressedManifestStaticFilesStorage (prod). Résultat :
+# WhiteNoise ne trouve pas `staticfiles.json` et renvoie 500 sur
+# toutes les pages qui étendent base.html.
 RUN DJANGO_SECRET_KEY=build-only-not-used-at-runtime \
+    DEBUG=False \
     python manage.py collectstatic --noinput --clear
 
 EXPOSE 8000
