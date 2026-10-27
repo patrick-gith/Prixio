@@ -14,7 +14,7 @@ coverage==7.16.2
 cryptography==50.0.2
 cssselect2==0.10.1
 dj-database-url==2.1.0
-Django==5.2.18
+Django==6.1.2
 django-cors-headers==4.4.0
 django-rosetta==0.10.1
 et_xmlfile==2.0.0
