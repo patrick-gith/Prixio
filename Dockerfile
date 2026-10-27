@@ -117,14 +117,17 @@ RUN printf '%s\n' \
     '    --max-requests-jitter 100 \' \
     '    --access-logfile - \' \
     '    --error-logfile -' \
-    > /app/entrypoint.sh && \
-    chmod +x /app/entrypoint.sh && \
-    chown prixio:prixio /app/entrypoint.sh
+    > /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh && \
+    chown prixio:prixio /usr/local/bin/entrypoint.sh
 
 USER prixio
 
 # Collecter les statiques (DEBUG=False pour générer le manifest)
+# DB_PASSWORD factice : collectstatic n'ouvre AUCUNE connexion DB,
+# mais settings.py exige la variable en mode non-testing.
 RUN DJANGO_SECRET_KEY=build-only-not-used-at-runtime \
+    DB_PASSWORD=build-only-not-used-at-runtime \
     DEBUG=False \
     python manage.py collectstatic --noinput --clear
 
@@ -134,4 +137,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD curl -fsS http://localhost:8000/healthz/ || exit 1
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

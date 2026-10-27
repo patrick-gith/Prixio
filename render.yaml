@@ -8,7 +8,7 @@ services:
     region: frankfurt
     branch: main
     buildCommand: |
-      pip install -r requirements.txt
+      pip install -r requirements.lock.txt || pip install -r requirements.txt
       python manage.py collectstatic --noinput
       python manage.py migrate
     startCommand: gunicorn ProjectPrixio.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 60
@@ -40,7 +40,7 @@ services:
     plan: starter
     region: frankfurt
     branch: main
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.lock.txt || pip install -r requirements.txt
     startCommand: celery -A ProjectPrixio worker -l info -Q batch,collect,default --concurrency=2
     envVars:
       - key: DJANGO_SECRET_KEY
@@ -64,7 +64,7 @@ services:
     plan: starter
     region: frankfurt
     branch: main
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.lock.txt || pip install -r requirements.txt
     startCommand: celery -A ProjectPrixio beat -l info
     envVars:
       - key: DJANGO_SECRET_KEY

@@ -3,6 +3,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib import messages
+from django.http import JsonResponse
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
@@ -89,3 +90,18 @@ def service_worker(request):
         return response
     except FileNotFoundError:
         return HttpResponse("", content_type="application/javascript")
+
+def healthz(request):
+    """Endpoint de santé — utilisé par Docker HEALTHCHECK et keep-alive.yml."""
+    from django.db import connection
+    try:
+        with connection.cursor() as cur:
+            cur.execute("SELECT 1")
+        db_ok = True
+    except Exception:
+        db_ok = False
+
+    return JsonResponse(
+        {"status": "ok" if db_ok else "degraded", "db": db_ok},
+        status=200 if db_ok else 503,
+    )

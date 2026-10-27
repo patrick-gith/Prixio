@@ -1,7 +1,5 @@
 """Fixtures partagées par tous les tests."""
 import os
-
-TEST_USER_PW = os.environ.get("TEST_USER_PW", "test-pw-not-a-secret")
 from datetime import timedelta
 from decimal import Decimal
 
@@ -11,6 +9,12 @@ from django.utils import timezone
 
 from CatalogApp.models import Product
 from PricingApp.models import PricePoint, Source, Watchlist
+
+
+# Mot de passe des utilisateurs de test — surchargeable en CI via TEST_USER_PW.
+# Le fallback ressemble volontairement à une valeur de test (pas de faux positif
+# scanner de secrets).
+TEST_USER_PW = os.environ.get("TEST_USER_PW", "test-pw-not-a-secret")
 
 
 @pytest.fixture

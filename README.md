@@ -1,3 +1,28 @@
+# PriceIQ (Prixio)
+
+> Comparateur de prix multi-sources — API Django + Celery.
+
+## Installation (clone frais)
+
+Prérequis : Python 3.12+, PostgreSQL 16 (ou Docker).
+
+```bash
+git clone <repo> && cd Prixio
+python -m venv .venv
+source .venv/bin/activate          # Windows : .venv\Scripts\activate
+pip install -r requirements.lock.txt
+
+cp .env.example .env
+# Renseigne au minimum :
+#   DJANGO_SECRET_KEY=<genere-en-une>
+#   DB_PASSWORD=<mot-de-passe>
+#   (ou DATABASE_URL=postgres://user:pass@host:5432/db)
+
+python manage.py migrate
+python manage.py runserver
+
+
+
 # PriceIQ
 
 **EN** — Paste a product. Get an answer.

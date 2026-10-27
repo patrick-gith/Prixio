@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: guizo
       POSTGRES_PASSWORD: ${DB_PASSWORD:-prixio_dev_pw}
     ports:
-      - "5432:5432"
+      - "5435:5432"   # 5433/5434 pris par africinvoice — 5435 libre
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,7 +18,12 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "6380:6379"   # 6379 pris par redis-server local WSL
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   web:
     build: .
@@ -34,12 +39,12 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-prixio_dev_pw}
       REDIS_URL: redis://redis:6379/0
     ports:
-      - "8000:8000"
+      - "8001:8000"   # 8000 pris par africinvoice_web_dev
     depends_on:
       db:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - .:/app
 
