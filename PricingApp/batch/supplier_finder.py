@@ -3,7 +3,7 @@ Récupère les coordonnées d'un vendeur à partir d'une offre.
 Utilise un cache DB pour éviter les appels répétés.
 """
 import logging
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 
 import requests
 from django.core.cache import cache
@@ -26,7 +26,7 @@ class SupplierContact:
 
 
 # Contacts pré-remplis pour les sources connues
-KNOWN_SUPPLIERS = {
+KNOWN_SUPPLIERS: dict[str, dict] = {
     "amazon":       {"name": "Amazon Business", "website": "https://business.amazon.fr",
                      "email": "contact@amazon.fr", "country": "FR"},
     "ebay":         {"name": "eBay", "website": "https://www.ebay.fr",

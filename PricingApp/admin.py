@@ -1,6 +1,6 @@
 from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
-from .models import Source, PricePoint, Watchlist, Alert
+
+from .models import Alert, PricePoint, Source, Watchlist
 
 
 @admin.register(Source)

@@ -3,9 +3,8 @@ from decimal import Decimal
 
 import pytest
 
-from CatalogApp.models import Product
 from PricingApp.engines.comparison import market_position
-from PricingApp.models import Source, PricePoint
+from PricingApp.models import PricePoint, Source
 
 
 @pytest.mark.django_db

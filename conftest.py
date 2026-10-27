@@ -1,19 +1,22 @@
 """Fixtures partagées par tous les tests."""
-from decimal import Decimal
+import os
+
+TEST_USER_PW = os.environ.get("TEST_USER_PW", "test-pw-not-a-secret")
 from datetime import timedelta
+from decimal import Decimal
 
 import pytest
 from django.contrib.auth.models import User
 from django.utils import timezone
 
 from CatalogApp.models import Product
-from PricingApp.models import Source, PricePoint, Watchlist
+from PricingApp.models import PricePoint, Source, Watchlist
 
 
 @pytest.fixture
 def user(db):
     return User.objects.create_user(
-        username="marie", email="marie@example.com", password="test1234",
+        username="marie", email="marie@example.com", password=TEST_USER_PW,
     )
 
 

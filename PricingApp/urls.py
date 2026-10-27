@@ -1,7 +1,8 @@
 # PricingApp/urls.py
 from django.urls import path
-from . import views, views_batch
-from . import api
+
+from . import api, views, views_batch
+
 app_name = "PricingApp"
 
 urlpatterns = [

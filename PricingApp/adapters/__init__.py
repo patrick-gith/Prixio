@@ -1,10 +1,10 @@
 # PricingApp/adapters/__init__.py
 from .base import Adapter, FetchedPrice
 from .coingecko import CoinGeckoAdapter
-from .google_books import GoogleBooksAdapter
-from .steam import SteamAdapter
 from .ebay import EbayAdapter
+from .google_books import GoogleBooksAdapter
 from .openfoodfacts import OpenFoodFactsAdapter  # <-- Ajout
+from .steam import SteamAdapter
 
 ALL_ADAPTERS = [
     CoinGeckoAdapter(),

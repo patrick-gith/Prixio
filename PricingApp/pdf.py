@@ -38,7 +38,7 @@ def render_purchase_order_pdf(
       - Pied de page : mention "Prixio", pagination, conditions
     """
     # Import tardif : WeasyPrint est lent au boot (charge Pango, Cairo…)
-    from weasyprint import HTML, CSS
+    from weasyprint import CSS, HTML
 
     language = language or translation.get_language() or "fr"
 

@@ -1,11 +1,11 @@
 """Mode B — compare mon prix à la médiane mondiale, toutes régions."""
-from statistics import median
 from decimal import Decimal
+from statistics import median
 
 from django.conf import settings
 
-from ..models import PricePoint
 from ..fx import convert
+from ..models import PricePoint
 
 
 def market_position(product, my_price: Decimal, my_currency: str, region: str) -> dict:

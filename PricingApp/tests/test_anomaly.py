@@ -1,8 +1,6 @@
 """Tests du moteur d'anomalie (Mode A)."""
 from decimal import Decimal
 
-import pytest
-
 from PricingApp.engines.anomaly import compute_baseline, opportunity_score
 
 

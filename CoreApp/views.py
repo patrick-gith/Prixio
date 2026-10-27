@@ -1,16 +1,18 @@
-from django.contrib import messages
-from django.shortcuts import redirect, render
-from django.utils.translation import gettext as _
 import json
 from pathlib import Path
-from django.conf import settings
-from django.http import HttpResponse, FileResponse
-from django.views.decorators.cache import cache_control
-from CatalogApp.services import get_or_create_product
-from PricingApp.services import collect_prices_for
-from PricingApp.analysis import analyze_product
-from .forms import SearchForm
 
+from django.conf import settings
+from django.contrib import messages
+from django.http import FileResponse, HttpResponse
+from django.shortcuts import redirect, render
+from django.utils.translation import gettext as _
+from django.views.decorators.cache import cache_control
+
+from CatalogApp.services import get_or_create_product
+from PricingApp.analysis import analyze_product
+from PricingApp.services import collect_prices_for
+
+from .forms import SearchForm
 
 EXAMPLES = [
     {"label": "📚 Le Petit Prince", "value": "9782070408504"},

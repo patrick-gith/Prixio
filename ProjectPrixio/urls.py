@@ -21,13 +21,13 @@ ProjectPrixio URL Configuration
 ProjectPrixio URL Configuration
 """
 from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.conf.urls.i18n import i18n_patterns
 from django.views.i18n import set_language
 
-from PrixioApp.views import register   # ajout
+from PrixioApp.views import register  # ajout
 
 urlpatterns = [
     path("admin/", admin.site.urls),

@@ -1,20 +1,20 @@
 # PrixioApp/views.py
+import os
+
+from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
-import os
-from django.views.decorators.http import require_POST
-from PricingApp import telegram_service
+
 from CatalogApp.models import Product
-from PricingApp.models import Alert, Watchlist
+from PricingApp import telegram_service
 from PricingApp.analysis import analyze_product
+from PricingApp.models import Alert, Watchlist
 from PricingApp.services import collect_prices_for
 
 from .forms import RegisterForm
-
 
 # ==========================================================
 # AUTHENTIFICATION
@@ -222,7 +222,7 @@ def refresh_all(request):
             result = collect_prices_for(w.product)
             if result.created:
                 refreshed += 1
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             messages.warning(
                 request,
                 _("Impossible d'actualiser « %(title)s » : %(err)s")
@@ -245,18 +245,19 @@ def refresh_all(request):
 
 @login_required
 def telegram_link(request):
-    from django.core.cache import cache
-    cache.set(f"telegram_code:{code}", request.user.id, timeout=600)
     """Affiche un code à coller dans le bot Telegram."""
+    from django.core.cache import cache
+
+    from .models import UserProfile
+
     profile = getattr(request.user, "prixio_profile", None)
     if not profile:
-        from .models import UserProfile
         profile = UserProfile.objects.create(user=request.user)
 
-    # Code éphémère : on le régénère à chaque visite
     code = telegram_service.generate_link_code()
+    cache.set(f"telegram_code:{code}", request.user.id, timeout=600)
     request.session["telegram_link_code"] = code
-    request.session.set_expiry(600)   # 10 min
+    request.session.set_expiry(600)
 
     bot_username = os.environ.get("TELEGRAM_BOT_USERNAME", "")
     deep_link = f"https://t.me/{bot_username}?start={code}" if bot_username else ""

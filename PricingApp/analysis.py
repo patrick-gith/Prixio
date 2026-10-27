@@ -1,6 +1,7 @@
 from CatalogApp.models import Product
-from .models import PricePoint
+
 from .engines.anomaly import compute_baseline, opportunity_score
+from .models import PricePoint
 
 
 def analyze_product(product: Product) -> dict:

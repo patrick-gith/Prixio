@@ -1,5 +1,7 @@
 from decimal import Decimal
+
 import requests
+
 from .base import Adapter, FetchedPrice
 
 

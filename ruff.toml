@@ -1,0 +1,33 @@
+# ruff.toml — config standalone (PAS de [tool.ruff])
+target-version = "py312"
+line-length = 100
+
+exclude = [
+    ".git", ".venv", "env", "venv",
+    "migrations", "staticfiles", "media",
+    "__pycache__", "htmlcov", ".tox",
+]
+
+[lint]
+select = ["E", "F", "I", "N", "RUF"]
+ignore = [
+    "N999",   # Django apps en CamelCase
+    "E501",   # line length (formatter s'en occupe)
+    "RUF012", # TYPE_CHOICES = [...] : pattern Django standard, ClassVar non-idiomatique
+    "E741",   # for l in lines : lisible en contexte
+    "RUF059", # variable unpackée inutilisée (_count, etc.)
+    "RUF002", # unicode ambigu dans docstring (emojis 🔥)
+    "RUF003", # unicode ambigu dans commentaire
+]
+
+[lint.per-file-ignores]
+"**/migrations/*" = ["ALL"]
+"conftest.py"     = ["E402"]
+"**/__init__.py"  = ["F401"]   # re-exports volontaires
+"**/urls.py"      = ["E402"]   # import register après setup
+"**/settings.py"  = ["E402"]   # import sys en milieu de fichier
+"**/celery.py"    = ["E402"]
+"**/wsgi.py"      = ["E402"]
+"**/asgi.py"      = ["E402"]
+"**/apps.py"      = ["E402"]
+"manage.py"       = ["E402"]

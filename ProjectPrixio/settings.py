@@ -23,19 +23,27 @@ IS_TESTING = (
     or "test" in sys.argv
     or os.environ.get("DJANGO_TESTING") == "1"
 )
-LOCAL_SECRET_KEY = "django-insecure-local-dev-only-change-this"
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", LOCAL_SECRET_KEY)
+
+# Plus de clé de secours : soit DJANGO_SECRET_KEY est définie,
+# soit on lève une erreur claire (sauf en mode test).
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    if IS_TESTING:
+        SECRET_KEY = "test-only-key-do-not-use-in-production-xxxxxxxx"
+    else:
+        raise RuntimeError(
+            "DJANGO_SECRET_KEY n'est pas défini. "
+            "Ajoutez-le dans .env ou dans les variables Render."
+        )
 
 DEBUG = os.environ.get("DEBUG", "True").strip().lower() in ("true", "1", "yes")
 
 if os.environ.get("RENDER"):
-    if not os.environ.get("DJANGO_SECRET_KEY") or SECRET_KEY == LOCAL_SECRET_KEY:
+    if "test-only-key" in SECRET_KEY:
         raise RuntimeError(
             "Configure une vraie DJANGO_SECRET_KEY dans les variables "
             "d'environnement de Render."
         )
-    #if DEBUG:
-       # raise RuntimeError("DEBUG doit être False en production sur Render.")
 
 ALLOWED_HOSTS = [
     h.strip() for h in os.environ.get(
@@ -129,7 +137,7 @@ WSGI_APPLICATION = "ProjectPrixio.wsgi.application"
 # BASE DE DONNÉES
 # ==========================================================
 
-DATABASE_URL = os.environ.get("RENDER_DATABASE_URL")
+DATABASE_URL = os.environ.get("RENDER_DATABASE_URL") or os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
     import dj_database_url
@@ -138,17 +146,33 @@ if DATABASE_URL:
             DATABASE_URL, conn_max_age=0, conn_health_checks=True,
         )
     }
-else:
+elif IS_TESTING:
+    # Tests : SQLite en mémoire → aucun secret requis
     DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Prixiodb',
-        'USER': 'guizo',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
     }
-}
+else:
+    # Dev local : variables d'env obligatoires, plus de mot de passe "1234"
+    _db_password = os.environ.get("DB_PASSWORD")
+    if not _db_password:
+        raise RuntimeError(
+            "DB_PASSWORD n'est pas défini. "
+            "Soit vous utilisez DATABASE_URL/RENDER_DATABASE_URL, "
+            "soit vous définissez DB_PASSWORD (voir .env.example)."
+        )
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DB_NAME", "Prixiodb"),
+            "USER": os.environ.get("DB_USER", "guizo"),
+            "PASSWORD": _db_password,
+            "HOST": os.environ.get("DB_HOST", "localhost"),
+            "PORT": os.environ.get("DB_PORT", "5432"),
+        }
+    }
 
 # ==========================================================
 # AUTHENTIFICATION

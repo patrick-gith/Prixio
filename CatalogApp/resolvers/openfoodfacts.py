@@ -1,7 +1,10 @@
 # CatalogApp/resolvers/openfoodfacts.py
 import re
+
 import requests
-from .base import Resolver, ResolvedProduct
+
+from .base import ResolvedProduct, Resolver
+
 
 class OpenFoodFactsResolver(Resolver):
     name = "openfoodfacts"

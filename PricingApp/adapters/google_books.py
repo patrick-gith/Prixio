@@ -21,7 +21,6 @@ from urllib3.util.retry import Retry
 
 from .base import Adapter, FetchedPrice
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -32,7 +32,6 @@ from urllib3.util.retry import Retry
 
 from .base import Adapter, FetchedPrice
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -65,7 +64,7 @@ class _TokenCache:
         self._token: str | None = None
         self._expires_at: float = 0.0
 
-    def get(self, fetcher) -> str | None:  # noqa: ANN001 — callable injecté
+    def get(self, fetcher) -> str | None:
         with self._lock:
             now = time.time()
             if self._token and now < self._expires_at - 60:

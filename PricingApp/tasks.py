@@ -31,8 +31,8 @@ def process_batch_task(self, job_id: int):
 
     Retourne un dict (utile pour Flower et les résultats Celery).
     """
-    from .models import BatchJob
     from .batch import process_batch
+    from .models import BatchJob
 
     try:
         job = BatchJob.objects.get(pk=job_id)
@@ -107,6 +107,7 @@ def collect_all_prices_task(self, product_id: int | None = None):
 def evaluate_alerts_task(self, product_id: int):
     """Évalue un produit et envoie les alertes si seuil dépassé."""
     from CatalogApp.models import Product
+
     from .alerts_service import evaluate_and_notify
 
     try:

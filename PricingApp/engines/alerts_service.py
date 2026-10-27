@@ -1,14 +1,12 @@
 """Envoi d'alertes (email + Telegram) après analyse d'un produit."""
 import logging
-from decimal import Decimal
 
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from django.urls import reverse
 
-from .models import Alert, Watchlist
 from .analysis import analyze_product
+from .models import Alert, Watchlist
 
 logger = logging.getLogger(__name__)
 

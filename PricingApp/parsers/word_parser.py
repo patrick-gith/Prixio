@@ -1,7 +1,7 @@
 """Parser Word (.docx) — paragraphes + tableaux."""
 from pathlib import Path
 
-from .base import ParserBase, ParsedFile, ParsedRow
+from .base import ParsedFile, ParsedRow, ParserBase
 
 
 class WordParser(ParserBase):

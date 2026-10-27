@@ -1,5 +1,5 @@
-from statistics import median, pstdev, mean
 from decimal import Decimal
+from statistics import mean, median, pstdev
 
 
 def compute_baseline(prices: list[Decimal], period_days: int = 90) -> dict:

@@ -1,7 +1,7 @@
 """Parser Excel (.xlsx / .xls) avec openpyxl."""
 from pathlib import Path
 
-from .base import ParserBase, ParsedFile, ParsedRow
+from .base import ParsedFile, ParsedRow, ParserBase
 
 
 class ExcelParser(ParserBase):

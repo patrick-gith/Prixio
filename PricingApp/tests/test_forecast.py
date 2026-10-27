@@ -1,6 +1,5 @@
 """Tests du moteur de prévision (Mode C)."""
 from datetime import date, timedelta
-from unittest.mock import patch
 
 import pytest
 

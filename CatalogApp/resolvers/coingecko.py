@@ -1,6 +1,6 @@
 import requests
-from .base import Resolver, ResolvedProduct
 
+from .base import ResolvedProduct, Resolver
 
 KNOWN = {
     "bitcoin": "bitcoin", "btc": "bitcoin",

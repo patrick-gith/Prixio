@@ -25,7 +25,6 @@ from CatalogApp.services import get_or_create_product
 from PricingApp.analysis import analyze_product
 from PricingApp.services import collect_prices_for
 
-
 API_KEY = os.environ.get("PRIXIO_API_KEY", "")
 
 

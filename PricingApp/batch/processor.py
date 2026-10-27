@@ -1,16 +1,14 @@
 """Traitement complet d'un BatchJob : parsing → matching → collecte → PDF."""
 import logging
-from pathlib import Path
 
 from django.utils import timezone
 
-from ..models import BatchJob, BatchLine
-from ..parsers import get_parser
-from ..services import collect_prices_for
 from ..analysis import analyze_product
+from ..models import BatchJob, BatchLine
+from ..services import collect_prices_for
 from .matcher import match_line
-from .supplier_finder import find_supplier_for_offer
 from .pdf_builder import build_batch_pdf
+from .supplier_finder import find_supplier_for_offer
 
 logger = logging.getLogger(__name__)
 

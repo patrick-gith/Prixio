@@ -1,16 +1,18 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.translation import gettext as _
-from django.http import HttpResponse
-from django.utils.text import slugify
 from django.conf import settings
-from .pdf import render_purchase_order_pdf
-from .engines.forecast import procurement_signal
-from CatalogApp.models import Product
 from django.contrib import messages
-from .models import PricePoint, Source, CompetitorListing, PurchaseIntent
-from .engines.comparison import market_position
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import translation
+from django.utils.text import slugify
+from django.utils.translation import gettext as _
+
+from CatalogApp.models import Product
+
+from .engines.comparison import market_position
+from .engines.forecast import procurement_signal
+from .models import CompetitorListing, PricePoint, PurchaseIntent, Source
+from .pdf import render_purchase_order_pdf
 
 
 def stats(request):

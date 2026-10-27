@@ -1,6 +1,8 @@
 """Prix Steam par région (API publique, pas de clé)."""
 from decimal import Decimal
+
 import requests
+
 from .base import Adapter, FetchedPrice
 
 

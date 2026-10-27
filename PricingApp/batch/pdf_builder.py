@@ -1,6 +1,5 @@
 """Génère UN PDF unique contenant tout le dossier commande."""
 from decimal import Decimal
-from io import BytesIO
 
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -9,7 +8,7 @@ from django.utils import timezone
 
 def build_batch_pdf(job) -> bytes:
     """Retourne les octets du PDF batch."""
-    from weasyprint import HTML, CSS
+    from weasyprint import CSS, HTML
 
     context = _build_context(job)
     html = render_to_string("PricingApp/pdf/batch_report.html", context)
@@ -26,7 +25,7 @@ def _build_context(job) -> dict:
     resolved = [l for l in lines if l.product_id]
 
     # Regroupe par fournisseur pour le récap
-    by_supplier = {}
+    by_supplier: dict = {}
     for line in resolved:
         for offer in line.best_offers:
             if "source" not in offer:

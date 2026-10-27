@@ -28,7 +28,7 @@ jobs:
       - name: 📦 Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.lock.txt || pip install -r requirements.txt
 
       - name: ⏰ Dispatch scheduled tasks
         env:

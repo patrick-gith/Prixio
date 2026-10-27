@@ -128,6 +128,7 @@ RUN DJANGO_SECRET_KEY=build-only-not-used-at-runtime \
     DEBUG=False \
     python manage.py collectstatic --noinput --clear
 
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

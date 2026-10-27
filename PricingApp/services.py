@@ -16,10 +16,10 @@ from dataclasses import dataclass, field
 from django.db import transaction
 
 from CatalogApp.models import Product
-from .models import Source, PricePoint
+
 from .adapters import get_adapters_for
 from .adapters.base import FetchedPrice
-
+from .models import PricePoint, Source
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +58,9 @@ def _persist_price(product: Product, fetched: FetchedPrice) -> bool:
     on ne crée pas de doublon si la même source a déjà répondu dans les
     60 dernières secondes pour ce produit.
     """
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
 
     source, _ = Source.objects.get_or_create(
         adapter_key=fetched.adapter_key,
@@ -95,7 +96,7 @@ def _fetch_one(adapter, product: Product) -> tuple[str, FetchedPrice | None, str
     """
     try:
         return adapter.key, adapter.fetch(product), None
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.exception("Adapter %s crashed", adapter.key)
         return adapter.key, None, str(exc)
 
@@ -144,7 +145,7 @@ def collect_prices_for(product: Product) -> CollectResult:
                 if created:
                     result.created += 1
                     result.sources_used.append(adapter_key)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.exception("Failed to persist %s for %s", adapter_key, product)
                 result.failed += 1
                 result.errors.append(f"{adapter_key}: persist failed ({exc})")

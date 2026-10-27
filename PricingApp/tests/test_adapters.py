@@ -1,10 +1,9 @@
 """Tests des adaptateurs avec réponses HTTP mockées."""
 from decimal import Decimal
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
-from CatalogApp.models import Product
 from PricingApp.adapters.google_books import GoogleBooksAdapter
 
 

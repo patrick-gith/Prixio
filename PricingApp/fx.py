@@ -3,10 +3,8 @@ from datetime import date
 from decimal import Decimal
 
 import requests
-from django.conf import settings
 
 from .models import FxRate
-
 
 FRANKFURTER = "https://api.frankfurter.app"
 

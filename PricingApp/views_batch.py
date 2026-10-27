@@ -1,13 +1,13 @@
 """Vues du wizard batch : upload → verify → criteria → status → download."""
-import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, FileResponse
+from django.http import FileResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
+
 from .models import BatchJob, BatchLine
-from .parsers import get_parser, SUPPORTED_EXTENSIONS
+from .parsers import SUPPORTED_EXTENSIONS, get_parser
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 Mo
 MAX_LINES = 500
@@ -127,7 +127,7 @@ def batch_verify(request, job_id: int):
                 # Overrides manuels par ligne
         # Format attendu : override_<line_id>_<field>
         # Ex : override_42_designation, override_42_quantity, override_42_reference
-        overrides = {}
+        overrides: dict[int, dict] = {}
         for key, value in request.POST.items():
             if not key.startswith("override_"):
                 continue

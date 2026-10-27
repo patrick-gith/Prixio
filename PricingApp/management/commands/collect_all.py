@@ -1,10 +1,10 @@
 # PricingApp/management/commands/collect_all.py
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from PricingApp.alerts_service import evaluate_and_notify
 
 from CatalogApp.models import Product
 from PricingApp.services import collect_prices_for
-from PricingApp.alerts_service import evaluate_and_notify
 
 
 class Command(BaseCommand):

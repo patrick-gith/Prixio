@@ -6,7 +6,6 @@ from .excel_parser import ExcelParser
 from .pdf_parser import PDFParser
 from .word_parser import WordParser
 
-
 PARSERS = {
     "csv":  CSVParser,
     "xlsx": ExcelParser,

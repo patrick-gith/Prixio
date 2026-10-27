@@ -5,8 +5,12 @@ from decimal import Decimal
 
 from django.utils import timezone
 
-from ..models import PricePoint
 from ..fx import convert
+from ..models import PricePoint
+
+# Seuil de décision : 3% est le point où l'action devient rentable
+# (frais de réorganisation, attente, risque de rupture).
+DECISION_THRESHOLD = 0.03
 
 
 def procurement_signal(product, quantity: int, deadline, my_currency: str) -> dict:
@@ -57,10 +61,6 @@ def procurement_signal(product, quantity: int, deadline, my_currency: str) -> di
         return {"has_data": False}
 
     delta_pct = (forecast - current) / current
-
-    # Seuil de décision : 3% est le point où l'action devient rentable
-    # (frais de réorganisation, attente, risque de rupture).
-    DECISION_THRESHOLD = 0.03
 
     if delta_pct < -DECISION_THRESHOLD:
         signal = "WAIT"

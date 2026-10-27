@@ -1,5 +1,4 @@
 """Tests des vues principales."""
-from decimal import Decimal
 
 import pytest
 from django.urls import reverse

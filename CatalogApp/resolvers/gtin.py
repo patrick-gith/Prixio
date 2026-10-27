@@ -1,6 +1,8 @@
 import re
+
 import requests
-from .base import Resolver, ResolvedProduct
+
+from .base import ResolvedProduct, Resolver
 
 
 class GTINResolver(Resolver):

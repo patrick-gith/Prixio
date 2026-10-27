@@ -10,8 +10,8 @@ import requests
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
-from PrixioApp.models import UserProfile
 from PricingApp import telegram_service
+from PrixioApp.models import UserProfile
 
 logger = logging.getLogger(__name__)
 

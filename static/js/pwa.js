@@ -46,7 +46,7 @@
   });
 
   // API publique pour déclencher le prompt depuis un bouton
-  window.pwaInstall = async function () {
+  window.CapacitorInstall = async function () {
     if (!deferredPrompt) return false;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;

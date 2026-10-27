@@ -1,8 +1,8 @@
 # CatalogApp/resolvers/__init__.py
-from .base import Resolver, ResolvedProduct
-from .isbn import ISBNResolver
-from .gtin import GTINResolver
+from .base import ResolvedProduct, Resolver
 from .coingecko import CoinGeckoResolver
+from .gtin import GTINResolver
+from .isbn import ISBNResolver
 from .openfoodfacts import OpenFoodFactsResolver  # <-- Ajout
 
 ALL_RESOLVERS = [

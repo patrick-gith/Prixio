@@ -3,7 +3,7 @@ import csv
 import io
 from pathlib import Path
 
-from .base import ParserBase, ParsedFile, ParsedRow
+from .base import ParsedFile, ParsedRow, ParserBase
 
 
 class CSVParser(ParserBase):

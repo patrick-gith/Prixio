@@ -13,7 +13,6 @@ from rapidfuzz import fuzz, process
 from CatalogApp.models import Product
 from CatalogApp.services import get_or_create_product
 
-
 IDENTIFIER_PATTERNS = {
     "isbn": re.compile(r"^\d{13}$|^\d{9}[\dX]$"),
     "gtin": re.compile(r"^\d{8}$|^\d{12,14}$"),
