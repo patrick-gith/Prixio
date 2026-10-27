@@ -78,4 +78,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 🚀 Trigger Render Deploy
-        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        run: |
+          echo "→ POST $RENDER_DEPLOY_HOOK (masked)"
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
+          echo "✓ Render deploy triggered"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+
+      - name: ⏭ Skip Render Deploy (secret not configured)
+        if: ${{ secrets.RENDER_DEPLOY_HOOK == '' }}
+        run: |
+          echo "::notice::RENDER_DEPLOY_HOOK is not set — skipping deploy"
+          echo "To enable auto-deploy:"
+          echo "  1. Render Dashboard → service → Settings → Deploy Hook"
+          echo "  2. Copy the URL"
+          echo "  3. GitHub → Settings → Secrets → Actions → New secret"
+          echo "     Name: RENDER_DEPLOY_HOOK"
