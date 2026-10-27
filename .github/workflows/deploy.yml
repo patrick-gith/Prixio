@@ -1,5 +1,5 @@
 # .github/workflows/deploy.yml
-name: 🚀 Deploy to Render
+name: Deploy to Render
 
 on:
   push:
@@ -36,62 +36,59 @@ jobs:
           --health-retries 5
 
     env:
-      # Variables lues par settings.py
       DJANGO_SECRET_KEY: test-secret-key-for-ci-only
       DEBUG: "False"
       RENDER_DATABASE_URL: postgres://prixio:prixio@localhost:5432/prixio_test
       REDIS_URL: redis://localhost:6379/0
       ALLOWED_HOSTS: "localhost,127.0.0.1,testserver"
-      # Empêche Celery de chercher un broker en test
       CELERY_TASK_ALWAYS_EAGER: "True"
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: 🐍 Set up Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: 📦 Install system dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b \
             libcairo2 libgdk-pixbuf-2.0-0 libopenjp2-7 fonts-dejavu-core
 
-      - name: 📦 Install Python dependencies
+      - name: Install Python dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.lock.txt || pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: ✅ Django check
+      - name: Django check
         run: python manage.py check
 
-      - name: 🧪 Run tests
+      - name: Run tests
         run: pytest --cov=PricingApp --cov=PrixioApp --cov-report=term --cov-fail-under=50
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: 🚀 Trigger Render Deploy
-        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
-        run: |
-          echo "→ POST $RENDER_DEPLOY_HOOK (masked)"
-          curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
-          echo "✓ Render deploy triggered"
+      - name: Trigger Render Deploy (skipped if RENDER_DEPLOY_HOOK missing)
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
-
-      - name: ⏭ Skip Render Deploy (secret not configured)
-        if: ${{ secrets.RENDER_DEPLOY_HOOK == '' }}
         run: |
-          echo "::notice::RENDER_DEPLOY_HOOK is not set — skipping deploy"
-          echo "To enable auto-deploy:"
-          echo "  1. Render Dashboard → service → Settings → Deploy Hook"
-          echo "  2. Copy the URL"
-          echo "  3. GitHub → Settings → Secrets → Actions → New secret"
-          echo "     Name: RENDER_DEPLOY_HOOK"
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "::notice::RENDER_DEPLOY_HOOK is not configured — skipping Render deploy"
+            echo "To enable auto-deploy:"
+            echo "  1. Render Dashboard → service → Settings → Deploy Hook"
+            echo "  2. Copy the URL"
+            echo "  3. GitHub → Settings → Secrets → Actions → New secret"
+            echo "     Name: RENDER_DEPLOY_HOOK"
+            exit 0
+          fi
+          echo "→ Triggering Render deploy..."
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
+          echo ""
+          echo "✓ Render deploy triggered"
