@@ -32,16 +32,21 @@ class Recommendation:
 
 def _client():
     from openai import OpenAI
-    key = getattr(settings, "OPENAI_API_KEY", "")
-    if not key:
-        raise RuntimeError("OPENAI_API_KEY missing")
-    return OpenAI(api_key=key)
+    groq_key = getattr(settings, "GROQ_API_KEY", "")
+    openai_key = getattr(settings, "OPENAI_API_KEY", "")
+    base_url = getattr(settings, "LLM_BASE_URL", "")
+
+    if groq_key and base_url:
+        return OpenAI(api_key=groq_key, base_url=base_url)
+    if openai_key:
+        return OpenAI(api_key=openai_key)
+    raise RuntimeError("No API key (GROQ_API_KEY or OPENAI_API_KEY)")
 
 
 def analyze_need(text: str) -> dict:
     try:
         resp = _client().chat.completions.create(
-            model=getattr(settings, "OPENAI_MODEL", "gpt-4o-mini"),
+            model=getattr(settings, "LLM_MODEL", "gpt-4o-mini"),
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system",
@@ -236,7 +241,7 @@ def match_services(text: str, top_k: int = 3) -> list[MatchResult]:
 def generate_reply(text: str, service, language: str) -> str:
     try:
         resp = _client().chat.completions.create(
-            model=getattr(settings, "OPENAI_MODEL", "gpt-4o-mini"),
+            model=getattr(settings, "LLM_MODEL", "gpt-4o-mini"),
             messages=[{
                 "role": "user",
                 "content": (
@@ -260,7 +265,7 @@ def recommend(text, *, min_score=None, min_confidence=None, top_k=3):
     min_score = min_score or getattr(settings, "SALESBOT_MIN_SCORE", 0.30)
     min_confidence = min_confidence or getattr(settings, "SALESBOT_MIN_CONFIDENCE", 0.50)
 
-    if not text or len(text.strip()) < 15:
+    if not text or len(text.strip()) < 10:
         return None
 
     analysis = analyze_need(text)
