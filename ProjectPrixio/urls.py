@@ -45,7 +45,7 @@ urlpatterns += i18n_patterns(
     path("", include(("CoreApp.urls", "CoreApp"), namespace="CoreApp")),
     path("", include(("PrixioApp.urls", "PrixioApp"), namespace="PrixioApp")),
     path("", include(("CatalogApp.urls", "CatalogApp"), namespace="CatalogApp")),
-    path("", include(("SalesBotApp.urls", "SalesBotApp"), namespace="SalesBotApp")),
+    path("bot/", include(("SalesBotApp.urls", "SalesBotApp"), namespace="SalesBotApp")),
     prefix_default_language=False,
 )
 

@@ -355,3 +355,11 @@ CELERY_FLOWER_BASIC_AUTH = os.environ.get("FLOWER_BASIC_AUTH", "")  # "user:pass
 # ==========================================================
 # Nécessaire pour Celery 5.4+ : sinon AttributeError sur `worker_state_db`
 CELERY_WORKER_STATE_DB = os.environ.get("CELERY_WORKER_STATE_DB", "")
+# ==========================================================
+# SALESBOT (ComeUp Sales Intelligence)
+# ==========================================================
+OPENAI_API_KEY          = os.environ.get("OPENAI_API_KEY", "")
+OPENAI_MODEL            = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+BRAVE_SEARCH_API_KEY    = os.environ.get("BRAVE_SEARCH_API_KEY", "")
+SALESBOT_MIN_SCORE      = float(os.environ.get("SALESBOT_MIN_SCORE", "0.30"))
+SALESBOT_MIN_CONFIDENCE = float(os.environ.get("SALESBOT_MIN_CONFIDENCE", "0.50"))
