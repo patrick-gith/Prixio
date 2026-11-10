@@ -1,0 +1,40 @@
+{% extends "SalesBotApp/base_salesbot.html" %}
+{% load i18n humanize %}
+
+{% block salesbot_content %}
+<div class="card" style="margin-bottom:16px;">
+  <div class="row-between" style="margin-bottom:10px;">
+    <span class="badge badge-primary">{{ opp.channel|capfirst }}</span>
+    <span class="badge {{ opp.status_badge }}">{{ opp.get_status_display }}</span>
+  </div>
+  <div style="font-size:15px; line-height:1.6; margin:10px 0;">{{ opp.text|linebreaks }}</div>
+  {% if opp.url %}<a href="{{ opp.url }}" target="_blank" class="text-muted" style="font-size:12px;">{{ opp.url }}</a>{% endif %}
+</div>
+
+<form method="post" style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;">
+  {% csrf_token %}
+  <button name="action" value="analyse" class="btn btn-primary btn-sm"><i class="fas fa-bolt"></i> Analyser</button>
+  <button name="action" value="publish" class="btn btn-secondary btn-sm"><i class="fas fa-paper-plane"></i> Marquer publié</button>
+  <button name="action" value="reject" class="btn btn-secondary btn-sm"><i class="fas fa-ban"></i> Rejeter</button>
+</form>
+
+{% for r in opp.recommendations.all %}
+<div class="card" style="margin-bottom:14px; border-left:3px solid {% if r.status == 'published' %}var(--success){% else %}var(--warning){% endif %};">
+  <div class="row-between" style="margin-bottom:10px;">
+    <div>
+      <div style="font-weight:800;">{{ r.service.title }}</div>
+      <span class="badge badge-primary">{{ r.service.category_label }}</span>
+      <span class="badge badge-success">score {{ r.score|floatformat:2 }}</span>
+      <span class="badge badge-warning">conf {{ r.confidence|floatformat:2 }}</span>
+      <span class="badge badge-primary">{{ r.language }}</span>
+    </div>
+    <span class="badge {% if r.status == 'published' %}badge-success{% else %}badge-warning{% endif %}">{{ r.status }}</span>
+  </div>
+  <div style="background:var(--brand-soft); padding:12px; border-radius:10px; font-size:13.5px; line-height:1.6;">
+    {{ r.reply_text|linebreaks }}
+  </div>
+</div>
+{% empty %}
+<div class="card text-muted">Aucune recommandation. Cliquez sur « Analyser ».</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "SalesBotApp/base_salesbot.html" %}
+{% load i18n %}
+
+{% block salesbot_content %}
+<div class="row-between" style="margin-bottom:16px;">
+  <h2 style="font-size:18px; font-weight:800; margin:0;">Prestations ComeUp</h2>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <a href="{% url 'SalesBotApp:import_csv' %}" class="btn btn-secondary btn-sm"><i class="fas fa-file-import"></i> Importer CSV</a>
+    <a href="{% url 'SalesBotApp:service_new' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Nouvelle</a>
+  </div>
+</div>
+
+<form method="get" style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Rechercher…" class="form-input" style="max-width:280px;">
+  <select name="cat" class="form-select" style="max-width:260px;">
+    <option value="">Toutes catégories</option>
+    {% for code, label in categories %}
+      <option value="{{ code }}" {% if code == cat %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-secondary btn-sm"><i class="fas fa-search"></i> Filtrer</button>
+</form>
+
+<div class="card" style="padding:0;">
+  <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--border); text-align:left;">
+        <th style="padding:12px 14px;">Titre</th>
+        <th style="padding:12px 14px;">Catégorie</th>
+        <th style="padding:12px 14px;">Statut</th>
+        <th style="padding:12px 14px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in services %}
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:12px 14px;">
+          <div style="font-weight:700;">{{ s.title }}</div>
+          <div class="text-muted truncate" style="font-size:12px; max-width:400px;">{{ s.description|default:s.url_comeup }}</div>
+        </td>
+        <td style="padding:12px 14px;"><span class="badge badge-primary">{{ s.category_label }}</span></td>
+        <td style="padding:12px 14px;">
+          {% if s.is_active %}<span class="badge badge-success">Active</span>
+          {% else %}<span class="badge badge-warning">Désactivée</span>{% endif %}
+        </td>
+        <td style="padding:12px 14px; text-align:right;">
+          <a href="{% url 'SalesBotApp:service_edit' s.pk %}" class="btn btn-secondary btn-sm"><i class="fas fa-pen"></i></a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" style="padding:22px; text-align:center;" class="text-muted">Aucune prestation. <a href="{% url 'SalesBotApp:import_csv' %}" style="color:var(--brand);">Importez le CSV</a>.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

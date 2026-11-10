@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="section-eyebrow"><i class="fas fa-robot"></i> SalesBot</div>
+
+<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px;">
+  <a href="{% url 'SalesBotApp:dashboard' %}" class="btn btn-secondary btn-sm"><i class="fas fa-chart-line"></i> Dashboard</a>
+  <a href="{% url 'SalesBotApp:services_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-layer-group"></i> Prestations</a>
+  <a href="{% url 'SalesBotApp:opportunities_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-inbox"></i> Opportunités</a>
+  <a href="{% url 'SalesBotApp:playground' %}" class="btn btn-primary btn-sm"><i class="fas fa-flask"></i> Playground</a>
+  <a href="{% url 'SalesBotApp:channels' %}" class="btn btn-secondary btn-sm"><i class="fas fa-plug"></i> Canaux</a>
+  <a href="{% url 'SalesBotApp:search_queries' %}" class="btn btn-secondary btn-sm"><i class="fas fa-magnifying-glass"></i> Veille</a>
+  <a href="{% url 'SalesBotApp:logs' %}" class="btn btn-secondary btn-sm"><i class="fas fa-list"></i> Logs</a>
+</div>
+
+{% block salesbot_content %}{% endblock %}
+{% endblock %}

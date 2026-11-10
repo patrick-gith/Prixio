@@ -851,6 +851,10 @@
           class="nav-link {% if request.resolver_match.url_name == 'batch_new' %}active{% endif %}">
           <i class="fas fa-file-import"></i><span>{% trans "Import" %}</span>
         </a>
+        <a href="{% url 'SalesBotApp:dashboard' %}"
+           class="nav-link {% if request.resolver_match.namespace == 'SalesBotApp' %}active{% endif %}">
+          <i class="fas fa-robot"></i><span>{% trans "Bot" %}</span>
+        </a>
         {% endif %}
       </nav>
     </div>
@@ -909,6 +913,7 @@
    class="nav-link {% if request.resolver_match.url_name == 'batch_new' %}active{% endif %}">
   <i class="fas fa-file-import"></i><span>{% trans "Import" %}</span>
 </a>
+<a href="{% url 'SalesBotApp:dashboard' %}" class="nav-link"><i class="fas fa-robot"></i>{% trans "Bot" %}</a>
     <form method="post" action="{% url 'logout' %}" style="margin:12px 0 0;">
       {% csrf_token %}
       <button type="submit" class="nav-link" style="width:100%;">

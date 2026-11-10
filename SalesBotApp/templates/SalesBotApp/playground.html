@@ -1,0 +1,74 @@
+{% extends "SalesBotApp/base_salesbot.html" %}
+{% load i18n %}
+
+{% block salesbot_content %}
+<div class="card" style="margin-bottom:18px;">
+  <h2 style="font-size:18px; font-weight:800; margin:0 0 4px;">🧪 Playground — tester une demande</h2>
+  <p class="text-muted" style="font-size:13px; margin:0 0 16px;">
+    Collez n'importe quelle demande client. Le moteur analyse, matche la bonne prestation,
+    et génère une réponse dans la langue du prospect.
+  </p>
+  <form method="post">
+    {% csrf_token %}
+    <div style="margin-bottom:12px;">{{ form.text }}</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+      <div>
+        <label class="text-muted" style="font-size:12px; font-weight:700; text-transform:uppercase;">Langue</label>
+        {{ form.language_override }}
+      </div>
+      <div>
+        <label class="text-muted" style="font-size:12px; font-weight:700; text-transform:uppercase;">Forcer une prestation</label>
+        {{ form.service_override }}
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-flask"></i> Tester</button>
+  </form>
+</div>
+
+{% if result %}
+<div class="card" style="margin-bottom:18px; border-left:4px solid var(--success);">
+  <div class="row-between" style="margin-bottom:12px;">
+    <div>
+      <div class="text-muted" style="font-size:11.5px; font-weight:700; text-transform:uppercase;">Prestation recommandée</div>
+      <div style="font-size:17px; font-weight:800;">{{ result.service.title }}</div>
+      <span class="badge badge-primary">{{ result.service.category_label }}</span>
+      <span class="badge badge-success">Score {{ result.score|floatformat:2 }}</span>
+      <span class="badge badge-warning">Confiance {{ result.confidence|floatformat:2 }}</span>
+      <span class="badge badge-primary">Langue : {{ result.language }}</span>
+    </div>
+  </div>
+  <div style="background:var(--brand-soft); padding:14px; border-radius:12px; font-size:14px; line-height:1.6;">
+    {{ result.reply|linebreaks }}
+  </div>
+  <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button type="button" class="btn btn-secondary btn-sm"
+            onclick="navigator.clipboard.writeText('{{ result.reply|escapejs }}'); showToast && showToast('success','Copié','Réponse dans le presse-papiers');">
+      <i class="fas fa-copy"></i> Copier la réponse
+    </button>
+    <a href="{{ result.service.url_comeup }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
+      <i class="fas fa-external-link"></i> Voir la prestation
+    </a>
+  </div>
+</div>
+
+{% if matches %}
+<div class="card">
+  <h3 style="font-size:15px; font-weight:800; margin:0 0 12px;">🔎 Pourquoi ce match ? (top 3)</h3>
+  {% for m in matches %}
+    <div class="row-between" style="padding:10px 0; border-bottom:1px solid var(--border); font-size:13px;">
+      <div>
+        <div style="font-weight:700;">{{ m.service.title }}</div>
+        <div class="text-muted" style="font-size:12px;">{{ m.service.category_label }}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:140px; height:6px; background:var(--border); border-radius:4px; overflow:hidden;">
+          <div style="width:{% widthratio m.score 1 100 %}%; height:100%; background:linear-gradient(90deg,var(--brand),var(--brand-2));"></div>
+        </div>
+        <span class="badge badge-primary">{{ m.score|floatformat:2 }}</span>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

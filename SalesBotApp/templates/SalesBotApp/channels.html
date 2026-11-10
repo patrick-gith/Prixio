@@ -1,0 +1,32 @@
+{% extends "SalesBotApp/base_salesbot.html" %}
+{% block salesbot_content %}
+<div class="card" style="padding:0;">
+  <table style="width:100%; border-collapse:collapse; font-size:13.5px;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--border); text-align:left;">
+        <th style="padding:12px 14px;">Canal</th>
+        <th style="padding:12px 14px;">Actif</th>
+        <th style="padding:12px 14px;">Mode</th>
+        <th style="padding:12px 14px;">Score min</th>
+        <th style="padding:12px 14px;">Quota/jour</th>
+        <th style="padding:12px 14px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in policies %}
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:12px 14px; font-weight:700;">{{ p.channel|capfirst }}</td>
+        <td style="padding:12px 14px;">{% if p.is_enabled %}<span class="badge badge-success">ON</span>{% else %}<span class="badge badge-danger">OFF</span>{% endif %}</td>
+        <td style="padding:12px 14px;"><span class="badge badge-primary">{{ p.get_mode_display }}</span></td>
+        <td style="padding:12px 14px;">{{ p.min_score }}</td>
+        <td style="padding:12px 14px;">{{ p.daily_limit }}</td>
+        <td style="padding:12px 14px; text-align:right;"><a href="{% url 'SalesBotApp:channel_edit' p.pk %}" class="btn btn-secondary btn-sm"><i class="fas fa-pen"></i></a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="text-muted" style="font-size:12px; margin-top:14px;">
+  ⚠️ Google n'est pas un canal de réponse : la détection via Google Alerts/Brave prépare un brouillon à publier sur le site source. Quora / Reddit restent en mode brouillon par défaut.
+</p>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "SalesBotApp/base_salesbot.html" %}
+{% load i18n %}
+
+{% block salesbot_content %}
+<div class="card">
+  <h2 style="font-size:18px; font-weight:800; margin:0 0 14px;">
+    {% if obj %}Éditer{% else %}Nouvelle{% endif %} prestation
+  </h2>
+  <form method="post">
+    {% csrf_token %}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      {% for field in form %}
+      <div style="grid-column: {% if field.name in 'description,keywords_fr,keywords_en' %}1 / -1{% else %}span 1{% endif %};">
+        <label class="text-muted" style="font-size:12px; font-weight:700; text-transform:uppercase;">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="text-muted" style="font-size:11.5px;">{{ field.help_text }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:16px; display:flex; gap:8px;">
+      <button class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+      <a href="{% url 'SalesBotApp:services_list' %}" class="btn btn-secondary">Annuler</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

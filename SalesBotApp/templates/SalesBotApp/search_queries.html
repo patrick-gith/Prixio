@@ -1,0 +1,26 @@
+{% extends "SalesBotApp/base_salesbot.html" %}
+{% block salesbot_content %}
+<div class="card" style="margin-bottom:16px;">
+  <h2 style="font-size:17px; font-weight:800;">Ajouter une requête de veille</h2>
+  <form method="post" style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+    {% csrf_token %}
+    {% for field in form %}
+      <div><label class="text-muted" style="font-size:12px; font-weight:700; text-transform:uppercase;">{{ field.label }}</label>{{ field }}</div>
+    {% endfor %}
+    <div style="grid-column:1/-1;"><button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Ajouter</button></div>
+  </form>
+</div>
+<div class="card" style="padding:0;">
+  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+    {% for q in queries %}
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:10px;"><span class="badge badge-primary">{{ q.kind }}</span></td>
+      <td style="padding:10px;">{{ q.query|default:q.url }}</td>
+      <td style="padding:10px;">{{ q.channel }}</td>
+      <td style="padding:10px;">{% if q.is_active %}<span class="badge badge-success">ON</span>{% else %}<span class="badge badge-danger">OFF</span>{% endif %}</td>
+    </tr>
+    {% empty %}<tr><td colspan="4" style="padding:20px; text-align:center;" class="text-muted">Aucune requête.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

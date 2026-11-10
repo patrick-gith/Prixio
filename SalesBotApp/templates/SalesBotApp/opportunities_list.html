@@ -1,0 +1,65 @@
+{% extends "SalesBotApp/base_salesbot.html" %}
+{% load i18n humanize %}
+
+{% block salesbot_content %}
+<div class="row-between" style="margin-bottom:16px;">
+  <h2 style="font-size:18px; font-weight:800; margin:0;">Opportunités</h2>
+</div>
+
+<form method="get" style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Rechercher…" class="form-input" style="max-width:260px;">
+  <select name="channel" class="form-select" style="max-width:180px;">
+    <option value="">Tous canaux</option>
+    <option value="telegram" {% if channel == 'telegram' %}selected{% endif %}>Telegram</option>
+    <option value="discord" {% if channel == 'discord' %}selected{% endif %}>Discord</option>
+    <option value="quora" {% if channel == 'quora' %}selected{% endif %}>Quora</option>
+    <option value="reddit" {% if channel == 'reddit' %}selected{% endif %}>Reddit</option>
+    <option value="google" {% if channel == 'google' %}selected{% endif %}>Google</option>
+    <option value="rss" {% if channel == 'rss' %}selected{% endif %}>RSS</option>
+  </select>
+  <select name="status" class="form-select" style="max-width:180px;">
+    <option value="">Tous statuts</option>
+    <option value="new" {% if status == 'new' %}selected{% endif %}>Nouveau</option>
+    <option value="recommended" {% if status == 'recommended' %}selected{% endif %}>Recommandé</option>
+    <option value="published" {% if status == 'published' %}selected{% endif %}>Publié</option>
+    <option value="rejected" {% if status == 'rejected' %}selected{% endif %}>Rejeté</option>
+  </select>
+  <button class="btn btn-secondary btn-sm"><i class="fas fa-filter"></i> Filtrer</button>
+</form>
+
+<form method="post" action="{% url 'SalesBotApp:opportunities_bulk' %}">
+  {% csrf_token %}
+  <div class="card" style="padding:0;">
+    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border); text-align:left;">
+          <th style="padding:10px;"><input type="checkbox" onclick="document.querySelectorAll('.opp-cb').forEach(c=>c.checked=this.checked)"></th>
+          <th style="padding:10px;">Source</th>
+          <th style="padding:10px;">Texte</th>
+          <th style="padding:10px;">Score</th>
+          <th style="padding:10px;">Statut</th>
+          <th style="padding:10px;">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in opps %}
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px;"><input type="checkbox" name="ids" value="{{ o.id }}" class="opp-cb"></td>
+          <td style="padding:10px;"><span class="badge badge-primary">{{ o.channel|capfirst }}</span></td>
+          <td style="padding:10px;"><a href="{% url 'SalesBotApp:opportunity_detail' o.pk %}" style="color:inherit; text-decoration:none;">{{ o.text|truncatechars:100 }}</a></td>
+          <td style="padding:10px;">{% if o.score %}{{ o.score|floatformat:2 }}{% else %}—{% endif %}</td>
+          <td style="padding:10px;"><span class="badge {{ o.status_badge }}">{{ o.get_status_display }}</span></td>
+          <td style="padding:10px;" class="text-muted">{{ o.created_at|naturaltime }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="padding:22px; text-align:center;" class="text-muted">Aucune opportunité.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button name="action" value="analyse" class="btn btn-primary btn-sm"><i class="fas fa-bolt"></i> Analyser la sélection</button>
+    <button name="action" value="reject" class="btn btn-secondary btn-sm" onclick="return confirm('Rejeter la sélection ?');"><i class="fas fa-ban"></i> Rejeter</button>
+  </div>
+</form>
+{% endblock %}
