@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: guizo
       POSTGRES_PASSWORD: ${DB_PASSWORD:-prixio_dev_pw}
     ports:
-      - "5435:5432"   # 5433/5434 pris par africinvoice — 5435 libre
+      - "5435:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,7 +18,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6380:6379"   # 6379 pris par redis-server local WSL
+      - "6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -27,6 +27,8 @@ services:
 
   web:
     build: .
+    env_file:
+      - .env
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py runserver 0.0.0.0:8000"
@@ -38,13 +40,61 @@ services:
       DB_USER: guizo
       DB_PASSWORD: ${DB_PASSWORD:-prixio_dev_pw}
       REDIS_URL: redis://redis:6379/0
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SALESBOT_MIN_SCORE: ${SALESBOT_MIN_SCORE:-0.30}
+      SALESBOT_MIN_CONFIDENCE: ${SALESBOT_MIN_CONFIDENCE:-0.50}
     ports:
-      - "8001:8000"   # 8000 pris par africinvoice_web_dev
+      - "8001:8000"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - .:/app
+
+  celery-worker:
+    entrypoint: []
+    build: .
+    env_file:
+      - .env
+    command: celery -A ProjectPrixio worker -l info
+    environment:
+      DEBUG: "True"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-only-change-me-please-xxxxxxxx}
+      DB_HOST: db
+      DB_NAME: Prixiodb
+      DB_USER: guizo
+      DB_PASSWORD: ${DB_PASSWORD:-prixio_dev_pw}
+      REDIS_URL: redis://redis:6379/0
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SALESBOT_MIN_SCORE: ${SALESBOT_MIN_SCORE:-0.30}
+      SALESBOT_MIN_CONFIDENCE: ${SALESBOT_MIN_CONFIDENCE:-0.50}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+
+  celery-beat:
+    entrypoint: []
+    build: .
+    env_file:
+      - .env
+    command: celery -A ProjectPrixio beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      DEBUG: "True"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-only-change-me-please-xxxxxxxx}
+      DB_HOST: db
+      DB_NAME: Prixiodb
+      DB_USER: guizo
+      DB_PASSWORD: ${DB_PASSWORD:-prixio_dev_pw}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
     volumes:
       - .:/app
 

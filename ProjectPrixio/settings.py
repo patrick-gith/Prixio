@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     "CoreApp",
     "PrixioApp",
     "SalesBotApp",
+    "django_celery_beat",
 ]
 # ==========================================================
 # MIDDLEWARE
@@ -366,3 +367,5 @@ SALESBOT_MIN_CONFIDENCE = float(os.environ.get("SALESBOT_MIN_CONFIDENCE", "0.50"
 GROQ_API_KEY  = os.environ.get("GROQ_API_KEY", "")
 LLM_BASE_URL  = os.environ.get("LLM_BASE_URL", "")
 LLM_MODEL     = os.environ.get("LLM_MODEL", os.environ.get("OPENAI_MODEL", "gpt-4o-mini"))
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"

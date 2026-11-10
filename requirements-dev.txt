@@ -74,3 +74,4 @@ whitenoise==6.7.0
 zopfli==0.4.3
 feedparser==6.0.11
 openai==1.60.0
+django-celery-beat==2.9.0
