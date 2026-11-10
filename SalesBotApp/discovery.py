@@ -58,7 +58,7 @@ def fetch_rss(feed_url: str, channel: str = "rss", context: str = ""):
         return []
     feed = feedparser.parse(feed_url)
     return [
-        _save(f"rss:{feed_url}", channel, e.get("title", ""), e.get("summary", ""),
-              e.get("link", ""), context=context)
+        _save("rss", channel, e.get("title", ""), e.get("summary", ""),
+              e.get("link", ""), context=(context or feed_url)[:256])
         for e in feed.entries
     ]

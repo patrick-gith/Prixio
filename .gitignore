@@ -60,3 +60,15 @@ desktop.ini
 *.bak
 *.tmp
 *.orig
+
+# Fichiers de sauvegarde locaux
+*.bak
+*.bak2
+*.bak3
+*.bak4
+*.bak5
+*.bak6
+*.bak7
+*.bak8
+*.bak9
+*.orig

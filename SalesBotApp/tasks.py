@@ -40,3 +40,24 @@ def run_discovery_task():
                 fetch_rss(q.url, channel=q.channel)
         except Exception as e:
             logger.warning("discovery failed for %s: %s", q.id, e)
+
+
+@shared_task
+def process_pending_task(limit: int = 20):
+    """
+    Parcourt les opportunités 'new' (max `limit`) et lance le pipeline
+    de recommandation sur chacune. Évite de surcharger le LLM.
+    """
+    import logging
+    from .models import Opportunity
+    logger = logging.getLogger(__name__)
+
+    ids = list(
+        Opportunity.objects.filter(status="new")
+        .order_by("-created_at")
+        .values_list("id", flat=True)[:limit]
+    )
+    logger.info("process_pending_task: %d opportunité(s) à traiter", len(ids))
+    for oid in ids:
+        process_opportunity_task.delay(oid)
+    return {"queued": len(ids)}

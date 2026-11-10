@@ -45,13 +45,13 @@ class Opportunity(models.Model):
         ("recommended", "Recommandé"), ("drafted", "Brouillon"),
         ("published", "Publié"), ("skipped", "Ignoré"), ("rejected", "Rejeté"),
     ]
-    source      = models.CharField(max_length=32, choices=SOURCE_CHOICES)
-    channel     = models.CharField(max_length=32)
-    title       = models.CharField(max_length=300, blank=True)
+    source      = models.CharField(max_length=300, choices=SOURCE_CHOICES)
+    channel     = models.CharField(max_length=64)
+    title       = models.CharField(max_length=500, blank=True)
     text        = models.TextField()
-    url         = models.URLField(blank=True)
-    author_id   = models.CharField(max_length=128, blank=True)
-    context     = models.CharField(max_length=256, blank=True)
+    url         = models.URLField(blank=True, max_length=2000)
+    author_id   = models.CharField(max_length=255, blank=True)
+    context     = models.CharField(max_length=512, blank=True)
     language    = models.CharField(max_length=8, default="fr")
     status      = models.CharField(max_length=16, choices=STATUS_CHOICES, default="new")
     score       = models.FloatField(null=True, blank=True)
